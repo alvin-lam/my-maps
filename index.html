@@ -1,0 +1,703 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>World Map</title>
+<link rel="icon" type="image/png" href="icon.png?v=2">
+<link rel="apple-touch-icon" href="icon.png?v=2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif&display=swap">
+<style>
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --text: #1c2330;
+  --muted: #5d6676;
+  --border: #dde1e7;
+  --primary: #1f4fd6;
+  --primary-text: #ffffff;
+  --brand-link: #1F5FD1;
+  --radius: 12px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12151b;
+    --surface: #1b2029;
+    --text: #e8ebf0;
+    --muted: #9aa3b2;
+    --border: #2c3340;
+    --primary: #5b84f5;
+    --brand-link: #7A9CEB;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12151b;
+  --surface: #1b2029;
+  --text: #e8ebf0;
+  --muted: #9aa3b2;
+  --border: #2c3340;
+  --primary: #5b84f5;
+  --brand-link: #7A9CEB;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.container {
+  position: relative;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding-block: 32px 96px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* Brand line: "All Trips Considered" in Instrument Serif, brand blue */
+.brand {
+  font-family: "Instrument Serif", Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  font-size: 2.8125rem;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  margin: 0 0 6px;
+}
+.brand, .page-header h1 { text-align: center; text-wrap: balance; }
+.brand a, .copyright a {
+  color: var(--brand-link);
+  text-decoration: none;
+  border-radius: 4px;
+}
+.brand a:focus-visible, .copyright a:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+h1 { font-size: 1.5rem; margin: 0 0 8px; }
+h2 { font-size: 1.15rem; margin: 0; }
+.lede { color: var(--muted); margin: 0 0 24px; text-align: center; text-wrap: balance; }
+#page-title:focus { outline: none; }
+
+/* Light/dark toggle, upper right */
+.theme-toggle {
+  position: absolute;
+  top: 16px;
+  right: max(16px, env(safe-area-inset-right, 0px));
+  width: 40px; height: 40px;
+  display: grid; place-items: center;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  transition: background .2s, border-color .2s;
+}
+.theme-toggle:hover { border-color: var(--muted); }
+.theme-toggle:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.theme-toggle svg { fill: currentColor; stroke: currentColor; }
+.theme-toggle .icon-moon { stroke: none; }
+.theme-toggle .icon-sun { display: none; }
+:root[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+:root[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-toggle .icon-sun { display: block; }
+  :root:not([data-theme="light"]) .theme-toggle .icon-moon { display: none; }
+}
+
+/* Cards */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.card-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.card-footer { margin-top: 12px; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; }
+.hint { color: var(--muted); font-size: .9rem; margin: 8px 0 0; }
+
+.btn {
+  font: inherit; font-weight: 600;
+  border-radius: 8px; padding: 8px 14px; min-height: 40px;
+  cursor: pointer; border: 1px solid transparent;
+}
+.btn-primary { background: var(--primary); color: var(--primary-text); }
+.btn-ghost { background: transparent; color: var(--muted); border-color: var(--border); }
+.btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+
+/* Footer: disclaimer, 75px app icon, serif copyright */
+.disclaimer { color: var(--muted); font-size: .85rem; }
+.disclaimer p { margin: 0 0 6px; }
+.footer-icon { display: block; width: 75px; height: 75px; margin: 24px auto 0; }
+.copyright {
+  margin-top: 1.5em !important;
+  text-align: center;
+  font-family: "Instrument Serif", Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  font-size: 1.125rem;
+  letter-spacing: 0.01em;
+}
+
+/* Back to top, lower right */
+.back-to-top {
+  position: fixed;
+  right: max(20px, calc(env(safe-area-inset-right, 0px) + 16px));
+  bottom: max(20px, calc(env(safe-area-inset-bottom, 0px) + 16px));
+  z-index: 15;
+  width: 48px; height: 48px;
+  display: grid; place-items: center;
+  padding: 0; border: 0; border-radius: 999px;
+  background: var(--primary); color: var(--primary-text);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .18);
+  cursor: pointer;
+}
+.back-to-top:hover { filter: brightness(1.08); }
+.back-to-top:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+body.has-install-banner .back-to-top { bottom: calc(var(--install-banner-height, 150px) + 16px); }
+
+/* Add to Home Screen banner */
+.install-banner {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -6px 20px rgba(0, 0, 0, .12);
+  padding-top: 14px;
+  padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.install-icon { width: 48px; height: 48px; border-radius: 11px; flex: none; }
+.install-text { display: flex; flex-direction: column; flex: 1 1 220px; min-width: 0; font-size: .95rem; }
+.install-text span { color: var(--muted); }
+.install-actions { display: flex; gap: 8px; margin-left: auto; }
+.share-glyph {
+  display: inline-block; width: 14px; height: 17px; vertical-align: -2px;
+  background: var(--primary);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 17'%3E%3Cpath d='M7 0l3.5 3.5-1 1L7.7 2.7V11H6.3V2.7L4.5 4.5l-1-1z'/%3E%3Cpath d='M1 6h3.5v1.4H2.4v8.2h9.2V7.4H9.5V6H13v11H1z'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 17'%3E%3Cpath d='M7 0l3.5 3.5-1 1L7.7 2.7V11H6.3V2.7L4.5 4.5l-1-1z'/%3E%3Cpath d='M1 6h3.5v1.4H2.4v8.2h9.2V7.4H9.5V6H13v11H1z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+body.has-install-banner { padding-bottom: var(--install-banner-height, 140px); }
+
+@media (max-width: 680px) {
+  .container { padding-top: 68px; }
+  .theme-toggle { top: 14px; }
+  .brand { font-size: 2.375rem; }
+}
+@media (max-width: 600px) {
+  .card { padding: 16px; }
+  .disclaimer { font-size: .9rem; }
+  .card-footer .btn { flex: 1; }
+}
+
+/* World map */
+:root { --visited: #2f9e6e; --planning: #e0a320; --lived: #7b4fd6; --land: #d9dee6; --land-hover: #b9c2cf; --sea: #eaf1fb; }
+:root[data-theme="dark"] { --visited: #3fbf86; --planning: #f0b73a; --lived: #9d7cf0; --land: #3a4250; --land-hover: #556072; --sea: #161c26; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --visited: #3fbf86; --planning: #f0b73a; --lived: #9d7cf0; --land: #3a4250; --land-hover: #556072; --sea: #161c26; } }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.search-wrap { position: relative; margin-bottom: 12px; }
+#country-search { width: 100%; font: inherit; padding: 10px 14px; min-height: 44px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); }
+#country-search:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+.search-results { position: absolute; z-index: 10; left: 0; right: 0; top: calc(100% + 4px); margin: 0; padding: 4px; list-style: none; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.15); max-height: 260px; overflow-y: auto; }
+.search-results li { padding: 8px 10px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+.search-results li[aria-selected="true"], .search-results li:hover { background: var(--bg); }
+.search-results .empty { color: var(--muted); cursor: default; }
+.stats { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-bottom: 12px; font-size: .95rem; }
+.stat { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); }
+.stat b { color: var(--text); }
+.dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; flex: none; }
+.dot-visited { background: var(--visited); } .dot-planning { background: var(--planning); } .dot-lived { background: var(--lived); } .dot-none { background: var(--land); }
+.map-wrap { position: relative; background: var(--sea); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; aspect-ratio: 1.9 / 1; touch-action: none; }
+#map { display: block; width: 100%; height: 100%; cursor: grab; }
+#map .country { fill: var(--land); stroke: var(--surface); stroke-width: .5; vector-effect: non-scaling-stroke; cursor: pointer; transition: fill .15s; }
+#map .country:hover { fill: var(--land-hover); }
+#map .country.visited { fill: var(--visited); } #map .country.planning { fill: var(--planning); } #map .country.lived { fill: var(--lived); }
+#map .country.selected { stroke: var(--text); stroke-width: 1.5; }
+#map .country:focus { outline: none; } #map .country:focus-visible { stroke: var(--primary); stroke-width: 2; }
+.map-loading { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--muted); }
+.map-zoom { position: absolute; right: 8px; bottom: 8px; display: flex; flex-direction: column; gap: 4px; }
+.zoom-btn { width: 34px; height: 34px; font: inherit; font-size: 1.1rem; line-height: 1; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); cursor: pointer; }
+.zoom-btn:focus-visible { outline: 2px solid var(--primary); }
+.map-tip { position: fixed; z-index: 30; pointer-events: none; background: var(--text); color: var(--bg); font-size: .85rem; padding: 4px 8px; border-radius: 6px; white-space: nowrap; }
+.chooser { margin-top: 12px; padding: 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); }
+.chooser-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.chooser-close { width: 36px; height: 36px; border: 0; background: transparent; color: var(--muted); font-size: 1.5rem; cursor: pointer; border-radius: 8px; }
+.chooser-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.status-btn { font: inherit; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 8px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); cursor: pointer; }
+.status-btn[aria-checked="true"][data-status="visited"] { border-color: var(--visited); box-shadow: inset 0 0 0 1px var(--visited); }
+.status-btn[aria-checked="true"][data-status="planning"] { border-color: var(--planning); box-shadow: inset 0 0 0 1px var(--planning); }
+.status-btn[aria-checked="true"][data-status="lived"] { border-color: var(--lived); box-shadow: inset 0 0 0 1px var(--lived); }
+.status-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+.clear-btn { margin-top: 10px; width: 100%; }
+.lists { margin-top: 16px; }
+.lists summary { cursor: pointer; font-weight: 600; }
+.lists-count { margin-left: 2px; padding: 0 8px; border-radius: 999px; background: var(--bg); border: 1px solid var(--border); font-size: .85rem; font-weight: 600; color: var(--muted); }
+.lists-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 12px; }
+.lists-grid h3 { font-size: 1rem; margin: 0 0 6px; display: flex; align-items: center; gap: 6px; }
+.lists-grid ul { margin: 0; padding-left: 20px; color: var(--muted); }
+.lists-grid .none { color: var(--muted); font-size: .9rem; margin: 0; }
+@media (max-width: 600px) { .map-wrap { aspect-ratio: 1.3 / 1; } }
+.dl-group { position: relative; display: flex; }
+.dl-menu { position: absolute; z-index: 12; right: 0; bottom: calc(100% + 6px); min-width: 210px; padding: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.18); }
+.dl-menu button { display: flex; width: 100%; justify-content: space-between; align-items: center; gap: 12px; font: inherit; font-weight: 600; padding: 10px 12px; min-height: 40px; border: 0; border-radius: 6px; background: transparent; color: var(--text); cursor: pointer; text-align: left; }
+.dl-menu button span { font-weight: 400; font-size: .85rem; color: var(--muted); }
+.dl-menu button:hover, .dl-menu button:focus-visible { background: var(--bg); outline: none; }
+@media (max-width: 600px) { .dl-group { flex: 1 1 100%; } .dl-group .btn { flex: 1; } }
+</style>
+<script>
+/* Theme: apply a saved choice before paint; otherwise follow the device. */
+(function () {
+  "use strict";
+  var KEY = "world-map-theme";
+  var root = document.documentElement;
+  var media = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+  function saved() {
+    try { var v = localStorage.getItem(KEY); return v === "light" || v === "dark" ? v : null; }
+    catch (e) { return null; }
+  }
+  function effective() {
+    return root.getAttribute("data-theme") || (media && media.matches ? "dark" : "light");
+  }
+  var initial = saved();
+  if (initial) root.setAttribute("data-theme", initial);
+  function syncButton(button) {
+    var dark = effective() === "dark";
+    var label = dark ? "Switch to light mode" : "Switch to dark mode";
+    button.setAttribute("aria-label", label);
+    button.setAttribute("title", label);
+    button.setAttribute("aria-pressed", String(dark));
+  }
+  document.addEventListener("DOMContentLoaded", function () {
+    var button = document.getElementById("theme-toggle");
+    if (!button) return;
+    syncButton(button);
+    button.addEventListener("click", function () {
+      var next = effective() === "dark" ? "light" : "dark";
+      root.setAttribute("data-theme", next);
+      try { localStorage.setItem(KEY, next); } catch (e) {}
+      syncButton(button);
+    });
+    if (media && media.addEventListener) media.addEventListener("change", function () { syncButton(button); });
+  });
+})();
+</script>
+</head>
+<body>
+  <main class="container">
+    <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Switch to dark mode" title="Switch to dark mode">
+      <svg class="icon-moon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M20.5 14.6A8.5 8.5 0 0 1 9.4 3.5a8.5 8.5 0 1 0 11.1 11.1z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><g stroke-width="2" stroke-linecap="round"><path d="M12 1.8v2.4M12 19.8v2.4M1.8 12h2.4M19.8 12h2.4M4.8 4.8l1.7 1.7M17.5 17.5l1.7 1.7M4.8 19.2l1.7-1.7M17.5 6.5l1.7-1.7"/></g></svg>
+    </button>
+
+    <header class="page-header">
+      <p class="brand"><a href="https://alltripsconsidered.com" target="_blank" rel="noopener">All Trips Considered</a></p>
+      <h1 id="page-title" tabindex="-1">World Map 🌍</h1>
+      <p class="lede">Tap a country or search for it, then mark it as Visited, Planning or Lived.</p>
+    </header>
+
+    <section class="card">
+      <div class="search-wrap">
+        <label for="country-search" class="visually-hidden">Search for a country</label>
+        <input id="country-search" type="search" placeholder="Search for a country…" autocomplete="off" spellcheck="false"
+          role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="search-results">
+        <ul id="search-results" class="search-results" role="listbox" hidden></ul>
+      </div>
+      <div class="stats" id="stats">
+        <span class="stat"><i class="dot dot-visited"></i>Visited <b id="count-visited">0</b></span>
+        <span class="stat"><i class="dot dot-planning"></i>Planning <b id="count-planning">0</b></span>
+        <span class="stat"><i class="dot dot-lived"></i>Lived <b id="count-lived">0</b></span>
+      </div>
+      <div class="map-wrap" id="map-wrap">
+        <svg id="map" role="img" aria-label="World map"></svg>
+        <p class="map-loading" id="map-loading">Loading map…</p>
+        <div class="map-zoom">
+          <button type="button" class="zoom-btn" id="zoom-in" aria-label="Zoom in">+</button>
+          <button type="button" class="zoom-btn" id="zoom-out" aria-label="Zoom out">−</button>
+          <button type="button" class="zoom-btn" id="zoom-reset" aria-label="Reset zoom">⟲</button>
+        </div>
+      </div>
+      <div class="chooser" id="chooser" hidden>
+        <div class="chooser-head">
+          <h2 id="chooser-name">Country</h2>
+          <button type="button" class="chooser-close" id="chooser-close" aria-label="Close">×</button>
+        </div>
+        <div class="chooser-options" role="radiogroup" aria-labelledby="chooser-name">
+          <button type="button" class="status-btn" data-status="visited" role="radio"><i class="dot dot-visited"></i>Visited</button>
+          <button type="button" class="status-btn" data-status="planning" role="radio"><i class="dot dot-planning"></i>Planning</button>
+          <button type="button" class="status-btn" data-status="lived" role="radio"><i class="dot dot-lived"></i>Lived</button>
+        </div>
+        <button type="button" class="btn btn-ghost clear-btn" id="chooser-clear">Clear</button>
+      </div>
+      <details class="lists" id="lists">
+        <summary>My countries</summary>
+        <div class="lists-grid" id="lists-grid"></div>
+      </details>
+      <div class="card-footer">
+        <button type="button" class="btn btn-ghost" id="reset-all">Reset all</button>
+        <div class="dl-group">
+          <button type="button" class="btn btn-ghost dl-toggle" id="export-list" aria-haspopup="menu" aria-expanded="false" aria-controls="export-menu">Export countries ▾</button>
+          <div class="dl-menu" id="export-menu" role="menu" hidden>
+            <button type="button" role="menuitem" data-fmt="csv">CSV <span>spreadsheet</span></button>
+            <button type="button" role="menuitem" data-fmt="txt">TXT <span>plain text list</span></button>
+            <button type="button" role="menuitem" data-fmt="json">JSON <span>data</span></button>
+          </div>
+        </div>
+        <div class="dl-group">
+          <button type="button" class="btn btn-primary dl-toggle" id="download-image" aria-haspopup="menu" aria-expanded="false" aria-controls="image-menu">Download image ▾</button>
+          <div class="dl-menu" id="image-menu" role="menu" hidden>
+            <button type="button" role="menuitem" data-fmt="png">PNG <span>best quality</span></button>
+            <button type="button" role="menuitem" data-fmt="jpg">JPG <span>smaller file</span></button>
+            <button type="button" role="menuitem" data-fmt="svg">SVG <span>scalable vector</span></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="disclaimer">
+      <p>Data you enter is saved only in this browser.</p>
+      <p>Borders are approximate and shown for general information only.</p>
+      <img src="icon.png?v=2" alt="World Map icon" width="75" height="75" class="footer-icon">
+      <p class="copyright">© <span id="copyright-year">2026</span> <a href="https://alltripsconsidered.com">AllTripsConsidered.com</a>. All rights reserved.</p>
+    </footer>
+  </main>
+
+  <button type="button" id="back-to-top" class="back-to-top" aria-label="Back to top" title="Back to top" hidden>
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 19V5M5.5 11.5 12 5l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+
+  <div id="install-banner" class="install-banner" role="region" aria-label="Add to Home Screen" hidden>
+    <img src="icon.png?v=2" alt="" class="install-icon" width="48" height="48">
+    <div class="install-text">
+      <strong>Add World Map to your Home Screen</strong>
+      <span id="install-instructions">Tap <span class="share-glyph" aria-label="Share"></span> Share, then "Add to Home Screen".</span>
+    </div>
+    <div class="install-actions">
+      <button type="button" id="install-dismiss" class="btn btn-ghost">Not now</button>
+      <button type="button" id="install-accept" class="btn btn-primary" hidden>Install</button>
+    </div>
+  </div>
+
+<script>
+/* Add to Home Screen: iOS Safari gets Share-menu instructions; browsers that
+   fire beforeinstallprompt (Chrome/Edge/Android) get an Install button.
+   Hidden when already installed or after "Not now". */
+(function () {
+  "use strict";
+  var KEY = "world-map-install-dismissed";
+  var banner = document.getElementById("install-banner");
+  var acceptBtn = document.getElementById("install-accept");
+  var instructions = document.getElementById("install-instructions");
+  var deferred = null;
+
+  var standalone = (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone === true;
+  function dismissed() { try { return localStorage.getItem(KEY) === "1"; } catch (e) { return false; } }
+  if (standalone || dismissed()) return;
+
+  function show() {
+    banner.hidden = false;
+    document.body.classList.add("has-install-banner");
+    document.body.style.setProperty("--install-banner-height", banner.offsetHeight + "px");
+  }
+  function hide(remember) {
+    banner.hidden = true;
+    document.body.classList.remove("has-install-banner");
+    if (remember) { try { localStorage.setItem(KEY, "1"); } catch (e) {} }
+  }
+
+  var ua = navigator.userAgent;
+  var isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  var isSafari = /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua);
+  if (isIOS && isSafari) show();
+
+  window.addEventListener("beforeinstallprompt", function (e) {
+    e.preventDefault();
+    deferred = e;
+    instructions.textContent = "Open it like an app, straight from your Home Screen.";
+    acceptBtn.hidden = false;
+    show();
+  });
+  acceptBtn.addEventListener("click", function () {
+    if (!deferred) return;
+    deferred.prompt();
+    deferred.userChoice.then(function () { deferred = null; hide(true); });
+  });
+  document.getElementById("install-dismiss").addEventListener("click", function () { hide(true); });
+  window.addEventListener("appinstalled", function () { hide(true); });
+  window.addEventListener("resize", function () {
+    if (!banner.hidden) document.body.style.setProperty("--install-banner-height", banner.offsetHeight + "px");
+  });
+})();
+</script>
+<script>
+(function () {
+  "use strict";
+  var topButton = document.getElementById("back-to-top");
+  var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function toggleTopButton() { topButton.hidden = window.scrollY < 400; }
+  window.addEventListener("scroll", toggleTopButton, { passive: true });
+  toggleTopButton();
+  topButton.addEventListener("click", function () {
+    window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
+    document.getElementById("page-title").focus({ preventScroll: true });
+  });
+  document.getElementById("copyright-year").textContent = String(new Date().getFullYear());
+})();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+<script>
+(function () {
+  "use strict";
+  var KEY = "world-map-statuses";
+  var STATUSES = ["visited", "planning", "lived"];
+  var LABEL = { visited: "Visited", planning: "Planning", lived: "Lived" };
+  var data = load();
+  var countries = [], byId = {}, selectedId = null;
+  // ISO 3166-1 numeric -> alpha-2 + alpha-3. Kosovo uses the widely used user-assigned XK / XKX.
+  var ISO = {"716":"ZWZWE","894":"ZMZMB","887":"YEYEM","704":"VNVNM","862":"VEVEN","336":"VAVAT","548":"VUVUT","860":"UZUZB","858":"UYURY","583":"FMFSM","584":"MHMHL","580":"MPMNP","850":"VIVIR","316":"GUGUM","016":"ASASM","630":"PRPRI","840":"USUSA","239":"GSSGS","086":"IOIOT","654":"SHSHN","612":"PNPCN","660":"AIAIA","238":"FKFLK","136":"KYCYM","060":"BMBMU","092":"VGVGB","796":"TCTCA","500":"MSMSR","832":"JEJEY","831":"GGGGY","833":"IMIMN","826":"GBGBR","784":"AEARE","804":"UAUKR","800":"UGUGA","795":"TMTKM","792":"TRTUR","788":"TNTUN","780":"TTTTO","776":"TOTON","768":"TGTGO","626":"TLTLS","764":"THTHA","834":"TZTZA","762":"TJTJK","158":"TWTWN","760":"SYSYR","756":"CHCHE","752":"SESWE","748":"SZSWZ","740":"SRSUR","728":"SSSSD","729":"SDSDN","144":"LKLKA","724":"ESESP","410":"KRKOR","710":"ZAZAF","706":"SOSOM","090":"SBSLB","703":"SKSVK","705":"SISVN","702":"SGSGP","694":"SLSLE","690":"SCSYC","688":"RSSRB","686":"SNSEN","682":"SASAU","678":"STSTP","674":"SMSMR","882":"WSWSM","670":"VCVCT","662":"LCLCA","659":"KNKNA","646":"RWRWA","643":"RURUS","642":"ROROU","634":"QAQAT","620":"PTPRT","616":"PLPOL","608":"PHPHL","604":"PEPER","600":"PYPRY","598":"PGPNG","591":"PAPAN","585":"PWPLW","586":"PKPAK","512":"OMOMN","578":"NONOR","408":"KPPRK","566":"NGNGA","562":"NENER","558":"NINIC","554":"NZNZL","570":"NUNIU","184":"CKCOK","528":"NLNLD","533":"AWABW","531":"CWCUW","524":"NPNPL","520":"NRNRU","516":"NANAM","508":"MZMOZ","504":"MAMAR","732":"EHESH","499":"MEMNE","496":"MNMNG","498":"MDMDA","492":"MCMCO","484":"MXMEX","480":"MUMUS","478":"MRMRT","470":"MTMLT","466":"MLMLI","462":"MVMDV","458":"MYMYS","454":"MWMWI","450":"MGMDG","807":"MKMKD","442":"LULUX","440":"LTLTU","438":"LILIE","434":"LYLBY","430":"LRLBR","426":"LSLSO","422":"LBLBN","428":"LVLVA","418":"LALAO","417":"KGKGZ","414":"KWKWT","296":"KIKIR","404":"KEKEN","398":"KZKAZ","400":"JOJOR","392":"JPJPN","388":"JMJAM","380":"ITITA","376":"ILISR","275":"PSPSE","372":"IEIRL","368":"IQIRQ","364":"IRIRN","360":"IDIDN","356":"ININD","352":"ISISL","348":"HUHUN","340":"HNHND","332":"HTHTI","328":"GYGUY","624":"GWGNB","324":"GNGIN","320":"GTGTM","308":"GDGRD","300":"GRGRC","288":"GHGHA","276":"DEDEU","268":"GEGEO","270":"GMGMB","266":"GAGAB","250":"FRFRA","666":"PMSPM","876":"WFWLF","663":"MFMAF","652":"BLBLM","258":"PFPYF","540":"NCNCL","260":"TFATF","248":"AXALA","246":"FIFIN","242":"FJFJI","231":"ETETH","233":"EEEST","232":"ERERI","226":"GQGNQ","222":"SVSLV","818":"EGEGY","218":"ECECU","214":"DODOM","212":"DMDMA","262":"DJDJI","304":"GLGRL","234":"FOFRO","208":"DKDNK","203":"CZCZE","196":"CYCYP","192":"CUCUB","191":"HRHRV","384":"CICIV","188":"CRCRI","180":"CDCOD","178":"CGCOG","174":"KMCOM","170":"COCOL","156":"CNCHN","446":"MOMAC","344":"HKHKG","152":"CLCHL","148":"TDTCD","140":"CFCAF","132":"CVCPV","124":"CACAN","120":"CMCMR","116":"KHKHM","104":"MMMMR","108":"BIBDI","854":"BFBFA","100":"BGBGR","096":"BNBRN","076":"BRBRA","072":"BWBWA","070":"BABIH","068":"BOBOL","064":"BTBTN","204":"BJBEN","084":"BZBLZ","056":"BEBEL","112":"BYBLR","052":"BBBRB","050":"BDBGD","048":"BHBHR","044":"BSBHS","031":"AZAZE","040":"ATAUT","036":"AUAUS","334":"HMHMD","574":"NFNFK","051":"AMARM","032":"ARARG","028":"AGATG","024":"AOAGO","020":"ADAND","012":"DZDZA","008":"ALALB","004":"AFAFG","010":"AQATA","534":"SXSXM","x-Kosovo":"XKXKX"};
+  function codes(c) {
+    var v = ISO[c.key]; if (!v) return null;
+    var a2 = v.slice(0, 2), a3 = v.slice(2);
+    var flag = String.fromCodePoint(0x1F1E6 + a2.charCodeAt(0) - 65, 0x1F1E6 + a2.charCodeAt(1) - 65);
+    return { a2: a2, a3: a3, flag: flag };
+  }
+  function fullName(c) { var k = codes(c); return c.properties.name + (k ? " | " + k.a2 + " | " + k.a3 + " | " + k.flag : ""); }
+  var svg = d3.select("#map"), wrap = document.getElementById("map-wrap");
+  var g = svg.append("g"), pathsSel;
+  var tip = document.createElement("div"); tip.className = "map-tip"; tip.hidden = true; document.body.appendChild(tip);
+
+  function load() { try { var v = JSON.parse(localStorage.getItem(KEY)); return v && typeof v === "object" ? v : {}; } catch (e) { return {}; } }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {} }
+
+  var zoom = d3.zoom().scaleExtent([1, 12]).on("zoom", function (e) { g.attr("transform", e.transform); });
+  svg.call(zoom).on("dblclick.zoom", null);
+  var W = 960, H = 505;
+  svg.attr("viewBox", "0 0 " + W + " " + H).attr("preserveAspectRatio", "xMidYMid meet");
+  var projection = d3.geoNaturalEarth1();
+  var path = d3.geoPath(projection);
+
+  fetch("https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-50m.json").then(function (r) { return r.json(); }).then(function (topo) {
+    var fc = topojson.feature(topo, topo.objects.countries);
+    fc.features = fc.features.filter(function (f) { return f.properties.name !== "Antarctica"; });
+    projection.fitExtent([[6, 6], [W - 6, H - 6]], fc);
+    fc.features.forEach(function (f, i) {
+      f.key = f.id ? String(f.id) : "x-" + f.properties.name;
+      byId[f.key] = f;
+    });
+    countries = fc.features.slice().sort(function (a, b) { return a.properties.name.localeCompare(b.properties.name); });
+    pathsSel = g.selectAll("path").data(fc.features).join("path")
+      .attr("class", "country").attr("d", path).attr("tabindex", 0)
+      .attr("role", "button").attr("aria-label", function (d) { return d.properties.name; })
+      .on("click", function (e, d) { select(d.key, false); })
+      .on("keydown", function (e, d) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(d.key, false); } })
+      .on("mousemove", function (e, d) { tip.textContent = fullName(d) + (data[d.key] ? " · " + LABEL[data[d.key]] : ""); tip.hidden = false; tip.style.left = (e.clientX + 12) + "px"; tip.style.top = (e.clientY + 12) + "px"; })
+      .on("mouseleave", function () { tip.hidden = true; });
+    document.getElementById("map-loading").hidden = true;
+    render();
+  }).catch(function () { document.getElementById("map-loading").textContent = "Couldn't load the map. Check your connection and refresh."; });
+
+  function render() {
+    if (pathsSel) pathsSel.attr("class", function (d) { return "country" + (data[d.key] ? " " + data[d.key] : "") + (d.key === selectedId ? " selected" : ""); });
+    STATUSES.forEach(function (s) {
+      document.getElementById("count-" + s).textContent = Object.keys(data).filter(function (k) { return data[k] === s && byId[k]; }).length;
+    });
+    var grid = document.getElementById("lists-grid"); grid.innerHTML = "";
+    STATUSES.forEach(function (s) {
+      var col = document.createElement("div");
+      var h = document.createElement("h3"); h.innerHTML = '<i class="dot dot-' + s + '"></i>'; h.appendChild(document.createTextNode(LABEL[s])); col.appendChild(h);
+      var names = countries.filter(function (c) { return data[c.key] === s; }).map(fullName);
+      var n = document.createElement("span"); n.className = "lists-count"; n.textContent = names.length; h.appendChild(n);
+      if (!names.length) { var p = document.createElement("p"); p.className = "none"; p.textContent = "None yet"; col.appendChild(p); }
+      else { var ul = document.createElement("ul"); names.forEach(function (n) { var li = document.createElement("li"); li.textContent = n; ul.appendChild(li); }); col.appendChild(ul); }
+      grid.appendChild(col);
+    });
+    if (selectedId) {
+      document.querySelectorAll(".status-btn").forEach(function (b) { b.setAttribute("aria-checked", String(data[selectedId] === b.dataset.status)); });
+      document.getElementById("chooser-clear").disabled = !data[selectedId];
+    }
+  }
+
+  var chooser = document.getElementById("chooser");
+  function select(id, zoomTo) {
+    selectedId = id;
+    document.getElementById("chooser-name").textContent = fullName(byId[id]);
+    chooser.hidden = false;
+    if (zoomTo) {
+      var b = path.bounds(byId[id]), dx = b[1][0] - b[0][0], dy = b[1][1] - b[0][1];
+      var k = Math.max(1, Math.min(8, 0.5 / Math.max(dx / W, dy / H)));
+      var cx = (b[0][0] + b[1][0]) / 2, cy = (b[0][1] + b[1][1]) / 2;
+      svg.transition().duration(600).call(zoom.transform, d3.zoomIdentity.translate(W / 2, H / 2).scale(k).translate(-cx, -cy));
+    }
+    render();
+    chooser.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
+  function closeChooser() { selectedId = null; chooser.hidden = true; render(); }
+  document.getElementById("chooser-close").addEventListener("click", closeChooser);
+  document.querySelectorAll(".status-btn").forEach(function (b) {
+    b.addEventListener("click", function () {
+      if (!selectedId) return;
+      if (data[selectedId] === b.dataset.status) delete data[selectedId]; else data[selectedId] = b.dataset.status;
+      save(); render();
+    });
+  });
+  document.getElementById("chooser-clear").addEventListener("click", function () { if (selectedId) { delete data[selectedId]; save(); render(); } });
+  document.getElementById("reset-all").addEventListener("click", function () {
+    if (!Object.keys(data).length || !confirm("Clear all countries from your map?")) return;
+    data = {}; save(); render();
+  });
+  document.getElementById("zoom-in").addEventListener("click", function () { svg.transition().call(zoom.scaleBy, 1.6); });
+  document.getElementById("zoom-out").addEventListener("click", function () { svg.transition().call(zoom.scaleBy, 1 / 1.6); });
+  document.getElementById("zoom-reset").addEventListener("click", function () { svg.transition().call(zoom.transform, d3.zoomIdentity); });
+
+  // Downloads
+  function saveBlob(blob, name) {
+    var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  }
+  function grouped() {
+    return STATUSES.map(function (s) {
+      var list = countries.filter(function (c) { return data[c.key] === s; });
+      return { s: s, names: list.map(fullName), items: list.map(function (c) { var k = codes(c) || {}; return { name: c.properties.name, alpha2: k.a2 || "", alpha3: k.a3 || "", flag: k.flag || "" }; }) };
+    });
+  }
+  function exportList(fmt) {
+    var groups = grouped(), out, type;
+    if (fmt === "json") {
+      var obj = {}; groups.forEach(function (g) { obj[g.s] = g.items; });
+      out = JSON.stringify(obj, null, 2); type = "application/json";
+    } else if (fmt === "txt") {
+      out = "My Countries\n\n" + groups.map(function (g) {
+        return LABEL[g.s] + " (" + g.names.length + ")\n" + (g.names.length ? g.names.map(function (n) { return "- " + n; }).join("\n") : "- None");
+      }).join("\n\n") + "\n"; type = "text/plain;charset=utf-8";
+    } else {
+      var rows = [["Country", "Alpha-2", "Alpha-3", "Flag", "Status"]];
+      groups.forEach(function (g) { g.items.forEach(function (it) { rows.push([it.name, it.alpha2, it.alpha3, it.flag, LABEL[g.s]]); }); });
+      out = "﻿" + rows.map(function (r) { return r.map(function (v) { return '"' + String(v).replace(/"/g, '""') + '"'; }).join(","); }).join("\r\n");
+      type = "text/csv;charset=utf-8";
+    }
+    saveBlob(new Blob([out], { type: type }), "my-countries." + fmt);
+  }
+
+  function esc(t) { return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+  function downloadImage(fmt) {
+    if (!pathsSel) return;
+    var cs = getComputedStyle(document.documentElement);
+    function v(n) { return cs.getPropertyValue(n).trim(); }
+    var col = { none: v("--land"), visited: v("--visited"), planning: v("--planning"), lived: v("--lived") };
+    var padTop = 90, padBottom = 70, TH = H + padTop + padBottom;
+    var items = grouped().map(function (g) { return { s: g.s, t: LABEL[g.s] + " " + g.names.length }; });
+
+    if (fmt === "svg") {
+      var sp = d3.geoPath(projection), font = "system-ui, -apple-system, sans-serif";
+      var o = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + W + ' ' + TH + '" width="' + W * 2 + '" height="' + TH * 2 + '">',
+        '<rect width="100%" height="100%" fill="' + v("--surface") + '"/>',
+        '<rect y="' + padTop + '" width="' + W + '" height="' + H + '" fill="' + v("--sea") + '"/>',
+        '<text x="' + W / 2 + '" y="42" text-anchor="middle" font-family="Instrument Serif, Georgia, serif" font-size="34" fill="' + v("--brand-link") + '">All Trips Considered</text>',
+        '<text x="' + W / 2 + '" y="72" text-anchor="middle" font-family="' + font + '" font-size="20" font-weight="600" fill="' + v("--text") + '">My World Map</text>',
+        '<g transform="translate(0,' + padTop + ')" stroke="' + v("--surface") + '" stroke-width="0.5">'];
+      countries.forEach(function (c) { o.push('<path fill="' + col[data[c.key] || "none"] + '" d="' + sp(c) + '"><title>' + esc(fullName(c)) + '</title></path>'); });
+      o.push('</g>');
+      var x = W / 2 - 180, y = padTop + H + 42;
+      items.forEach(function (it) {
+        o.push('<circle cx="' + (x + 6) + '" cy="' + (y - 5) + '" r="6" fill="' + col[it.s] + '"/><text x="' + (x + 20) + '" y="' + y + '" font-family="' + font + '" font-size="16" fill="' + v("--text") + '">' + it.t + '</text>');
+        x += 130;
+      });
+      o.push('</svg>');
+      saveBlob(new Blob([o.join("\n")], { type: "image/svg+xml" }), "my-world-map.svg");
+      return;
+    }
+
+    var scale = 2, canvas = document.createElement("canvas"); canvas.width = W * scale; canvas.height = TH * scale;
+    var ctx = canvas.getContext("2d"); ctx.scale(scale, scale);
+    ctx.fillStyle = v("--surface"); ctx.fillRect(0, 0, W, TH);
+    ctx.fillStyle = v("--sea"); ctx.fillRect(0, padTop, W, H);
+    ctx.textAlign = "center"; ctx.fillStyle = v("--brand-link");
+    ctx.font = '400 34px "Instrument Serif", Georgia, serif'; ctx.fillText("All Trips Considered", W / 2, 42);
+    ctx.fillStyle = v("--text"); ctx.font = "600 20px system-ui, -apple-system, sans-serif"; ctx.fillText("My World Map", W / 2, 72);
+    ctx.save(); ctx.translate(0, padTop);
+    var p = d3.geoPath(projection, ctx);
+    ctx.strokeStyle = v("--surface"); ctx.lineWidth = 0.5;
+    countries.forEach(function (c) { ctx.beginPath(); p(c); ctx.fillStyle = col[data[c.key] || "none"]; ctx.fill(); ctx.stroke(); });
+    ctx.restore();
+    ctx.font = "16px system-ui, -apple-system, sans-serif"; ctx.textAlign = "left";
+    var widths = items.map(function (it) { return 22 + ctx.measureText(it.t).width; }), gap = 32;
+    var cx = (W - widths.reduce(function (a, b) { return a + b; }, 0) - gap * (items.length - 1)) / 2, cy = padTop + H + 42;
+    items.forEach(function (it, i) {
+      ctx.fillStyle = col[it.s]; ctx.beginPath(); ctx.arc(cx + 6, cy - 5, 6, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = v("--text"); ctx.fillText(it.t, cx + 20, cy); cx += widths[i] + gap;
+    });
+    var jpg = fmt === "jpg";
+    canvas.toBlob(function (b) { saveBlob(b, "my-world-map." + fmt); }, jpg ? "image/jpeg" : "image/png", jpg ? 0.92 : undefined);
+  }
+
+  // Format menus
+  var menus = [];
+  function setupMenu(btnId, menuId, run) {
+    var btn = document.getElementById(btnId), menu = document.getElementById(menuId), items = menu.querySelectorAll("[role=menuitem]");
+    function close(focusBtn) { menu.hidden = true; btn.setAttribute("aria-expanded", "false"); if (focusBtn) btn.focus(); }
+    function open() { menus.forEach(function (m) { m(); }); menu.hidden = false; btn.setAttribute("aria-expanded", "true"); items[0].focus(); }
+    menus.push(function () { close(false); });
+    btn.addEventListener("click", function (e) { e.stopPropagation(); if (menu.hidden) open(); else close(false); });
+    items.forEach(function (it, i) {
+      it.addEventListener("click", function (e) { e.stopPropagation(); close(true); run(it.dataset.fmt); });
+      it.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowDown") { e.preventDefault(); items[(i + 1) % items.length].focus(); }
+        else if (e.key === "ArrowUp") { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
+        else if (e.key === "Escape") { e.preventDefault(); close(true); }
+        else if (e.key === "Tab") close(false);
+      });
+    });
+  }
+  setupMenu("export-list", "export-menu", exportList);
+  setupMenu("download-image", "image-menu", downloadImage);
+  document.addEventListener("click", function () { menus.forEach(function (m) { m(); }); });
+
+  // Search
+  var input = document.getElementById("country-search"), list = document.getElementById("search-results"), active = -1, matches = [];
+  function norm(s) { return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase(); }
+  function showResults() {
+    var q = norm(input.value.trim());
+    if (!q) { list.hidden = true; input.setAttribute("aria-expanded", "false"); return; }
+    matches = countries.filter(function (c) { var k = codes(c); return norm(c.properties.name).indexOf(q) !== -1 || (k && (norm(k.a2) === q || norm(k.a3) === q)); })
+      .sort(function (a, b) { return (norm(a.properties.name).indexOf(q) === 0 ? 0 : 1) - (norm(b.properties.name).indexOf(q) === 0 ? 0 : 1); }).slice(0, 8);
+    active = matches.length ? 0 : -1;
+    list.innerHTML = "";
+    if (!matches.length) { var li = document.createElement("li"); li.className = "empty"; li.textContent = "No matching country"; list.appendChild(li); }
+    matches.forEach(function (c, i) {
+      var li = document.createElement("li"); li.id = "opt-" + i; li.setAttribute("role", "option");
+      li.innerHTML = '<i class="dot dot-' + (data[c.key] || "none") + '"></i>';
+      li.appendChild(document.createTextNode(fullName(c)));
+      li.addEventListener("mousedown", function (e) { e.preventDefault(); pick(i); });
+      list.appendChild(li);
+    });
+    highlight(); list.hidden = false; input.setAttribute("aria-expanded", "true");
+  }
+  function highlight() {
+    Array.prototype.forEach.call(list.children, function (li, i) { li.setAttribute("aria-selected", String(i === active)); });
+    if (active >= 0) input.setAttribute("aria-activedescendant", "opt-" + active); else input.removeAttribute("aria-activedescendant");
+  }
+  function pick(i) { var c = matches[i]; if (!c) return; input.value = ""; list.hidden = true; input.setAttribute("aria-expanded", "false"); select(c.key, true); }
+  input.addEventListener("input", showResults);
+  input.addEventListener("keydown", function (e) {
+    if (list.hidden) return;
+    if (e.key === "ArrowDown") { e.preventDefault(); active = Math.min(matches.length - 1, active + 1); highlight(); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); active = Math.max(0, active - 1); highlight(); }
+    else if (e.key === "Enter") { e.preventDefault(); pick(active); }
+    else if (e.key === "Escape") { list.hidden = true; input.setAttribute("aria-expanded", "false"); }
+  });
+  input.addEventListener("blur", function () { list.hidden = true; input.setAttribute("aria-expanded", "false"); });
+})();
+</script>
+</body>
+</html>
