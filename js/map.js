@@ -13,7 +13,7 @@
     var flag = String.fromCodePoint(0x1F1E6 + a2.charCodeAt(0) - 65, 0x1F1E6 + a2.charCodeAt(1) - 65);
     return { a2: a2, a3: a3, flag: flag };
   }
-  function fullName(c) { var k = codes(c); return (k ? k.flag + " " : "") + c.properties.name; }
+  function fullName(c) { var k = codes(c); return c.properties.name + (k ? " " + k.flag : ""); }
   var svg = d3.select("#map"), wrap = document.getElementById("map-wrap");
   var g = svg.append("g"), pathsSel;
   var tip = document.createElement("div"); tip.className = "map-tip"; tip.hidden = true; document.body.appendChild(tip);
