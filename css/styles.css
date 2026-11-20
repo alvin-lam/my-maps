@@ -211,6 +211,8 @@ body.has-install-banner { padding-bottom: var(--install-banner-height, 140px); }
 #map .country:hover { fill: var(--land-hover); }
 #map .country.visited { fill: var(--visited); } #map .country.planning { fill: var(--planning); } #map .country.lived { fill: var(--lived); } #map .country.living { fill: var(--living); }
 #map .country.selected { stroke: var(--text); stroke-width: 1.5; }
+#map .country.marker { stroke: var(--muted); stroke-width: 1; }
+#map .country.marker.selected { stroke: var(--text); stroke-width: 2; }
 #map .country:focus { outline: none; } #map .country:focus-visible { stroke: var(--primary); stroke-width: 2; }
 .map-loading { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--muted); }
 .map-zoom { position: absolute; right: 8px; bottom: 8px; display: flex; flex-direction: column; gap: 4px; }

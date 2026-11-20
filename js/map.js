@@ -76,13 +76,17 @@
   }
   function fullName(c) { var k = codes(c); var flag = k ? k.flag : c.properties.flag; return c.properties.name + (flag ? " " + flag : ""); }
   var svg = d3.select("#map"), wrap = document.getElementById("map-wrap");
-  var g = svg.append("g"), pathsSel;
+  var g = svg.append("g"), pathsSel, markers = [], MARKER_R = 3;
   var tip = document.createElement("div"); tip.className = "map-tip"; tip.hidden = true; document.body.appendChild(tip);
 
   function load() { try { var v = JSON.parse(localStorage.getItem(KEY)); return v && typeof v === "object" ? v : {}; } catch (e) { return {}; } }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {} }
 
-  var zoom = d3.zoom().scaleExtent([1, 12]).on("zoom", function (e) { g.attr("transform", e.transform); });
+  var zoom = d3.zoom().scaleExtent([1, 12]).on("zoom", function (e) {
+    g.attr("transform", e.transform);
+    // Keep marker dots the same size on screen at every zoom level.
+    g.selectAll("circle.marker").attr("r", MARKER_R / e.transform.k);
+  });
   svg.call(zoom).on("dblclick.zoom", null);
   var W = 960, H = 505;
   svg.attr("viewBox", "0 0 " + W + " " + H).attr("preserveAspectRatio", "xMidYMid meet");
@@ -101,9 +105,16 @@
       byId[f.key] = f;
     });
     countries = fc.features.slice().sort(function (a, b) { return a.properties.name.localeCompare(b.properties.name); });
-    pathsSel = g.selectAll("path").data(fc.features).join("path")
-      .attr("class", "country").attr("d", path).attr("tabindex", 0)
-      .attr("role", "button").attr("aria-label", function (d) { return d.properties.name; })
+    g.selectAll("path").data(fc.features).join("path")
+      .attr("d", path).attr("tabindex", 0)
+      .attr("role", "button").attr("aria-label", function (d) { return d.properties.name; });
+    // Places too small to see or tap get a dot on top of them.
+    markers = fc.features.filter(function (d) { return path.area(d) < 8; }).map(function (d) { return { d: d, c: path.centroid(d) }; })
+      .filter(function (m) { return isFinite(m.c[0]) && isFinite(m.c[1]); });
+    g.selectAll("circle.marker").data(markers.map(function (m) { return m.d; })).join("circle")
+      .attr("aria-hidden", "true").attr("r", MARKER_R)
+      .attr("cx", function (d, i) { return markers[i].c[0]; }).attr("cy", function (d, i) { return markers[i].c[1]; });
+    pathsSel = g.selectAll("path, circle")
       .on("click", function (e, d) { select(d.key, false); })
       .on("keydown", function (e, d) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(d.key, false); } })
       .on("mousemove", function (e, d) { tip.textContent = fullName(d) + (data[d.key] ? " · " + LABEL[data[d.key]] : ""); tip.hidden = false; tip.style.left = (e.clientX + 12) + "px"; tip.style.top = (e.clientY + 12) + "px"; })
@@ -113,7 +124,7 @@
   }).catch(function () { document.getElementById("map-loading").textContent = "Couldn't load the map. Check your connection and refresh."; });
 
   function render() {
-    if (pathsSel) pathsSel.attr("class", function (d) { return "country" + (data[d.key] ? " " + data[d.key] : "") + (d.key === selectedId ? " selected" : ""); });
+    if (pathsSel) pathsSel.attr("class", function (d) { return "country" + (this.tagName === "circle" ? " marker" : "") + (data[d.key] ? " " + data[d.key] : "") + (d.key === selectedId ? " selected" : ""); });
     STATUSES.forEach(function (s) {
       document.getElementById("count-" + s).textContent = Object.keys(data).filter(function (k) { return data[k] === s && byId[k]; }).length;
     });
@@ -213,6 +224,7 @@
         '<text x="' + W / 2 + '" y="72" text-anchor="middle" font-family="' + font + '" font-size="20" font-weight="600" fill="' + v("--text") + '">My World Map</text>',
         '<g transform="translate(0,' + padTop + ')" stroke="' + v("--surface") + '" stroke-width="0.5">'];
       countries.forEach(function (c) { o.push('<path fill="' + col[data[c.key] || "none"] + '" d="' + sp(c) + '"><title>' + esc(fullName(c)) + '</title></path>'); });
+      markers.forEach(function (m) { o.push('<circle cx="' + m.c[0] + '" cy="' + m.c[1] + '" r="' + MARKER_R + '" fill="' + col[data[m.d.key] || "none"] + '" stroke="' + v("--muted") + '"><title>' + esc(fullName(m.d)) + '</title></circle>'); });
       o.push('</g>');
       var x = W / 2 - 250, y = padTop + H + 42;
       items.forEach(function (it) {
@@ -235,6 +247,8 @@
     var p = d3.geoPath(projection, ctx);
     ctx.strokeStyle = v("--surface"); ctx.lineWidth = 0.5;
     countries.forEach(function (c) { ctx.beginPath(); p(c); ctx.fillStyle = col[data[c.key] || "none"]; ctx.fill(); ctx.stroke(); });
+    ctx.strokeStyle = v("--muted");
+    markers.forEach(function (m) { ctx.beginPath(); ctx.arc(m.c[0], m.c[1], MARKER_R, 0, Math.PI * 2); ctx.fillStyle = col[data[m.d.key] || "none"]; ctx.fill(); ctx.stroke(); });
     ctx.restore();
     ctx.font = "16px system-ui, -apple-system, sans-serif"; ctx.textAlign = "left";
     var widths = items.map(function (it) { return 22 + ctx.measureText(it.t).width; }), gap = 32;
