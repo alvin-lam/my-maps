@@ -201,9 +201,9 @@ body.has-install-banner { padding-bottom: var(--install-banner-height, 140px); }
 }
 
 /* World map */
-:root { --visited: #2f9e6e; --planning: #e0a320; --lived: #7b4fd6; --land: #d9dee6; --land-hover: #b9c2cf; --sea: #eaf1fb; }
-:root[data-theme="dark"] { --visited: #3fbf86; --planning: #f0b73a; --lived: #9d7cf0; --land: #3a4250; --land-hover: #556072; --sea: #161c26; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --visited: #3fbf86; --planning: #f0b73a; --lived: #9d7cf0; --land: #3a4250; --land-hover: #556072; --sea: #161c26; } }
+:root { --visited: #2f9e6e; --planning: #e0a320; --lived: #7b4fd6; --living: #d9534f; --land: #d9dee6; --land-hover: #b9c2cf; --sea: #eaf1fb; }
+:root[data-theme="dark"] { --visited: #3fbf86; --planning: #f0b73a; --lived: #9d7cf0; --living: #f07470; --land: #3a4250; --land-hover: #556072; --sea: #161c26; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --visited: #3fbf86; --planning: #f0b73a; --lived: #9d7cf0; --living: #f07470; --land: #3a4250; --land-hover: #556072; --sea: #161c26; } }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .search-wrap { position: relative; margin-bottom: 12px; }
 #country-search { width: 100%; font: inherit; padding: 10px 14px; min-height: 44px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); }
@@ -216,12 +216,12 @@ body.has-install-banner { padding-bottom: var(--install-banner-height, 140px); }
 .stat { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); }
 .stat b { color: var(--text); }
 .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; flex: none; }
-.dot-visited { background: var(--visited); } .dot-planning { background: var(--planning); } .dot-lived { background: var(--lived); } .dot-none { background: var(--land); }
+.dot-visited { background: var(--visited); } .dot-planning { background: var(--planning); } .dot-lived { background: var(--lived); } .dot-living { background: var(--living); } .dot-none { background: var(--land); }
 .map-wrap { position: relative; background: var(--sea); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; aspect-ratio: 1.9 / 1; touch-action: none; }
 #map { display: block; width: 100%; height: 100%; cursor: grab; }
 #map .country { fill: var(--land); stroke: var(--surface); stroke-width: .5; vector-effect: non-scaling-stroke; cursor: pointer; transition: fill .15s; }
 #map .country:hover { fill: var(--land-hover); }
-#map .country.visited { fill: var(--visited); } #map .country.planning { fill: var(--planning); } #map .country.lived { fill: var(--lived); }
+#map .country.visited { fill: var(--visited); } #map .country.planning { fill: var(--planning); } #map .country.lived { fill: var(--lived); } #map .country.living { fill: var(--living); }
 #map .country.selected { stroke: var(--text); stroke-width: 1.5; }
 #map .country:focus { outline: none; } #map .country:focus-visible { stroke: var(--primary); stroke-width: 2; }
 .map-loading { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--muted); }
@@ -232,11 +232,13 @@ body.has-install-banner { padding-bottom: var(--install-banner-height, 140px); }
 .chooser { margin-top: 12px; padding: 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); }
 .chooser-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
 .chooser-close { width: 36px; height: 36px; border: 0; background: transparent; color: var(--muted); font-size: 1.5rem; cursor: pointer; border-radius: 8px; }
-.chooser-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.chooser-options { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .status-btn { font: inherit; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 8px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); cursor: pointer; }
 .status-btn[aria-checked="true"][data-status="visited"] { border-color: var(--visited); box-shadow: inset 0 0 0 1px var(--visited); }
 .status-btn[aria-checked="true"][data-status="planning"] { border-color: var(--planning); box-shadow: inset 0 0 0 1px var(--planning); }
 .status-btn[aria-checked="true"][data-status="lived"] { border-color: var(--lived); box-shadow: inset 0 0 0 1px var(--lived); }
+.status-btn[aria-checked="true"][data-status="living"] { border-color: var(--living); box-shadow: inset 0 0 0 1px var(--living); }
+@media (max-width: 480px) { .chooser-options { grid-template-columns: repeat(2, 1fr); } }
 .status-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
 .clear-btn { margin-top: 10px; width: 100%; }
 .lists { margin-top: 16px; }
@@ -302,7 +304,7 @@ body.has-install-banner { padding-bottom: var(--install-banner-height, 140px); }
     <header class="page-header">
       <p class="brand"><a href="https://alltripsconsidered.com" target="_blank" rel="noopener">All Trips Considered</a></p>
       <h1 id="page-title" tabindex="-1">World Map 🌍</h1>
-      <p class="lede">Tap a country or search for it, then mark it as Visited, Planning or Lived.</p>
+      <p class="lede">Tap a country or search for it, then mark it as Visited, Planning, Lived or Living.</p>
     </header>
 
     <section class="card">
@@ -316,6 +318,7 @@ body.has-install-banner { padding-bottom: var(--install-banner-height, 140px); }
         <span class="stat"><i class="dot dot-visited"></i>Visited <b id="count-visited">0</b></span>
         <span class="stat"><i class="dot dot-planning"></i>Planning <b id="count-planning">0</b></span>
         <span class="stat"><i class="dot dot-lived"></i>Lived <b id="count-lived">0</b></span>
+        <span class="stat"><i class="dot dot-living"></i>Living <b id="count-living">0</b></span>
       </div>
       <div class="map-wrap" id="map-wrap">
         <svg id="map" role="img" aria-label="World map"></svg>
@@ -335,6 +338,7 @@ body.has-install-banner { padding-bottom: var(--install-banner-height, 140px); }
           <button type="button" class="status-btn" data-status="visited" role="radio"><i class="dot dot-visited"></i>Visited</button>
           <button type="button" class="status-btn" data-status="planning" role="radio"><i class="dot dot-planning"></i>Planning</button>
           <button type="button" class="status-btn" data-status="lived" role="radio"><i class="dot dot-lived"></i>Lived</button>
+          <button type="button" class="status-btn" data-status="living" role="radio"><i class="dot dot-living"></i>Living</button>
         </div>
         <button type="button" class="btn btn-ghost clear-btn" id="chooser-clear">Clear</button>
       </div>
@@ -459,8 +463,8 @@ body.has-install-banner { padding-bottom: var(--install-banner-height, 140px); }
 (function () {
   "use strict";
   var KEY = "world-map-statuses";
-  var STATUSES = ["visited", "planning", "lived"];
-  var LABEL = { visited: "Visited", planning: "Planning", lived: "Lived" };
+  var STATUSES = ["visited", "planning", "lived", "living"];
+  var LABEL = { visited: "Visited", planning: "Planning", lived: "Lived", living: "Living" };
   var data = load();
   var countries = [], byId = {}, selectedId = null;
   // ISO 3166-1 numeric -> alpha-2 + alpha-3. Kosovo uses the widely used user-assigned XK / XKX.
@@ -594,7 +598,7 @@ body.has-install-banner { padding-bottom: var(--install-banner-height, 140px); }
     if (!pathsSel) return;
     var cs = getComputedStyle(document.documentElement);
     function v(n) { return cs.getPropertyValue(n).trim(); }
-    var col = { none: v("--land"), visited: v("--visited"), planning: v("--planning"), lived: v("--lived") };
+    var col = { none: v("--land"), visited: v("--visited"), planning: v("--planning"), lived: v("--lived"), living: v("--living") };
     var padTop = 90, padBottom = 70, TH = H + padTop + padBottom;
     var items = grouped().map(function (g) { return { s: g.s, t: LABEL[g.s] + " " + g.names.length }; });
 
@@ -608,7 +612,7 @@ body.has-install-banner { padding-bottom: var(--install-banner-height, 140px); }
         '<g transform="translate(0,' + padTop + ')" stroke="' + v("--surface") + '" stroke-width="0.5">'];
       countries.forEach(function (c) { o.push('<path fill="' + col[data[c.key] || "none"] + '" d="' + sp(c) + '"><title>' + esc(fullName(c)) + '</title></path>'); });
       o.push('</g>');
-      var x = W / 2 - 180, y = padTop + H + 42;
+      var x = W / 2 - 250, y = padTop + H + 42;
       items.forEach(function (it) {
         o.push('<circle cx="' + (x + 6) + '" cy="' + (y - 5) + '" r="6" fill="' + col[it.s] + '"/><text x="' + (x + 20) + '" y="' + y + '" font-family="' + font + '" font-size="16" fill="' + v("--text") + '">' + it.t + '</text>');
         x += 130;
