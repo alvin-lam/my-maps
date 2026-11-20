@@ -54,6 +54,10 @@
         if (parts[i].length) out.push({ type: "Feature", id: r.id, properties: { name: r.name, flag: r.flag }, geometry: { type: "MultiPolygon", coordinates: parts[i] } });
       });
     });
+    // Disputed and occupied areas, drawn on top of the country that contains them.
+    (window.DISPUTED || []).forEach(function (a) {
+      out.push({ type: "Feature", properties: { name: a.name, flag: a.flag, note: a.note }, geometry: a.geometry });
+    });
     // Places too small to appear in the map data, drawn as small circles so they can still be marked.
     TINY.forEach(function (t) {
       var circle = d3.geoCircle().center([t.lon, t.lat]).radius(t.r || 0.35)();
@@ -117,7 +121,7 @@
     pathsSel = g.selectAll("path, circle")
       .on("click", function (e, d) { select(d.key, false); })
       .on("keydown", function (e, d) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(d.key, false); } })
-      .on("mousemove", function (e, d) { tip.textContent = fullName(d) + (data[d.key] ? " · " + LABEL[data[d.key]] : ""); tip.hidden = false; tip.style.left = (e.clientX + 12) + "px"; tip.style.top = (e.clientY + 12) + "px"; })
+      .on("mousemove", function (e, d) { tip.textContent = fullName(d) + (data[d.key] ? " · " + LABEL[data[d.key]] : "") + (d.properties.note ? " · " + d.properties.note : ""); tip.hidden = false; tip.style.left = (e.clientX + 12) + "px"; tip.style.top = (e.clientY + 12) + "px"; })
       .on("mouseleave", function () { tip.hidden = true; });
     document.getElementById("map-loading").hidden = true;
     render();
@@ -148,6 +152,8 @@
   function select(id, zoomTo) {
     selectedId = id;
     document.getElementById("chooser-name").textContent = fullName(byId[id]);
+    var note = document.getElementById("chooser-note");
+    note.textContent = byId[id].properties.note || ""; note.hidden = !byId[id].properties.note;
     chooser.hidden = false;
     if (zoomTo) {
       var b = path.bounds(byId[id]), dx = b[1][0] - b[0][0], dy = b[1][1] - b[0][1];

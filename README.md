@@ -14,6 +14,10 @@ Live site: [world.alltripsconsidered.com](https://world.alltripsconsidered.com)
 - **Light and dark themes:** The page follows your device setting, or you can choose one.
 - **Add to Home Screen:** Install the page like an app on phones and desktop browsers.
 
+## Disputed areas
+
+Disputed and occupied areas, such as Crimea, the Golan Heights and Abkhazia, are separate entries. Each one shows a note about who administers it and who claims it. Flags and notes follow the position of the United Nations where it has one. Outlines come from Natural Earth, which is in the public domain.
+
 ## Privacy
 
 Your selections are saved only in your browser's local storage. Nothing is sent to a server. Clearing your browser data will clear your map.
@@ -29,6 +33,8 @@ world-map/
 │   ├── map.js          Map, statuses, search and exports
 │   ├── install.js      Add to Home Screen banner
 │   └── back-to-top.js  Back to top button
+├── data/
+│   └── disputed.js     Disputed and occupied area outlines
 ├── assets/
 │   ├── icon.png        Site icon and app icon
 │   └── tabicon.png     Alternate tab icon

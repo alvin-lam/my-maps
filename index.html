@@ -88,6 +88,7 @@
           <h2 id="chooser-name">Country</h2>
           <button type="button" class="chooser-close" id="chooser-close" aria-label="Close">×</button>
         </div>
+        <p class="chooser-note" id="chooser-note" hidden></p>
         <div class="chooser-options" role="radiogroup" aria-labelledby="chooser-name">
           <button type="button" class="status-btn" data-status="visited" role="radio"><i class="dot dot-visited"></i>Visited</button>
           <button type="button" class="status-btn" data-status="planning" role="radio"><i class="dot dot-planning"></i>Planning</button>
@@ -123,7 +124,7 @@
 
     <footer class="disclaimer">
       <p>Data you enter is saved only in this browser.</p>
-      <p>Borders are approximate and shown for general information only.</p>
+      <p>Borders are approximate and shown for general information only. Disputed and occupied areas are shown as their own entries, and their notes follow the position of the United Nations where it has one.</p>
       <img src="assets/icon.png?v=3" alt="World Map icon" width="75" height="75" class="footer-icon">
       <p class="copyright">© <span id="copyright-year">2026</span> <a href="https://alltripsconsidered.com">AllTripsConsidered.com</a>. All rights reserved.</p>
     </footer>
@@ -149,6 +150,7 @@
 <script src="js/back-to-top.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+<script src="data/disputed.js"></script>
 <script src="js/map.js"></script>
 </body>
 </html>
