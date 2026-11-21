@@ -2,7 +2,7 @@
 
 An interactive world map for tracking the countries you have been to. Tap a country or search for it, then mark it with a status. The map colors each country to match.
 
-Live site: [world.alltripsconsidered.com](https://world.alltripsconsidered.com)
+Live site: [mymaps.alltripsconsidered.com](https://mymaps.alltripsconsidered.com)
 
 ## Features
 
