@@ -227,7 +227,7 @@
         '<rect width="100%" height="100%" fill="' + v("--surface") + '"/>',
         '<rect y="' + padTop + '" width="' + W + '" height="' + H + '" fill="' + v("--sea") + '"/>',
         '<text x="' + W / 2 + '" y="42" text-anchor="middle" font-family="Instrument Serif, Georgia, serif" font-size="34" fill="' + v("--brand-link") + '">All Trips Considered</text>',
-        '<text x="' + W / 2 + '" y="72" text-anchor="middle" font-family="' + font + '" font-size="20" font-weight="600" fill="' + v("--text") + '">My World Map</text>',
+        '<text x="' + W / 2 + '" y="72" text-anchor="middle" font-family="' + font + '" font-size="20" font-weight="600" fill="' + v("--text") + '">My Maps</text>',
         '<g transform="translate(0,' + padTop + ')" stroke="' + v("--surface") + '" stroke-width="0.5">'];
       countries.forEach(function (c) { o.push('<path fill="' + col[data[c.key] || "none"] + '" d="' + sp(c) + '"><title>' + esc(fullName(c)) + '</title></path>'); });
       markers.forEach(function (m) { o.push('<circle cx="' + m.c[0] + '" cy="' + m.c[1] + '" r="' + MARKER_R + '" fill="' + col[data[m.d.key] || "none"] + '" stroke="' + v("--muted") + '"><title>' + esc(fullName(m.d)) + '</title></circle>'); });
@@ -238,7 +238,7 @@
         x += 130;
       });
       o.push('</svg>');
-      saveBlob(new Blob([o.join("\n")], { type: "image/svg+xml" }), "my-world-map.svg");
+      saveBlob(new Blob([o.join("\n")], { type: "image/svg+xml" }), "my-maps.svg");
       return;
     }
 
@@ -248,7 +248,7 @@
     ctx.fillStyle = v("--sea"); ctx.fillRect(0, padTop, W, H);
     ctx.textAlign = "center"; ctx.fillStyle = v("--brand-link");
     ctx.font = '400 34px "Instrument Serif", Georgia, serif'; ctx.fillText("All Trips Considered", W / 2, 42);
-    ctx.fillStyle = v("--text"); ctx.font = "600 20px system-ui, -apple-system, sans-serif"; ctx.fillText("My World Map", W / 2, 72);
+    ctx.fillStyle = v("--text"); ctx.font = "600 20px system-ui, -apple-system, sans-serif"; ctx.fillText("My Maps", W / 2, 72);
     ctx.save(); ctx.translate(0, padTop);
     var p = d3.geoPath(projection, ctx);
     ctx.strokeStyle = v("--surface"); ctx.lineWidth = 0.5;
@@ -264,7 +264,7 @@
       ctx.fillStyle = v("--text"); ctx.fillText(it.t, cx + 20, cy); cx += widths[i] + gap;
     });
     var jpg = fmt === "jpg";
-    canvas.toBlob(function (b) { saveBlob(b, "my-world-map." + fmt); }, jpg ? "image/jpeg" : "image/png", jpg ? 0.92 : undefined);
+    canvas.toBlob(function (b) { saveBlob(b, "my-maps." + fmt); }, jpg ? "image/jpeg" : "image/png", jpg ? 0.92 : undefined);
   }
 
   // Format menus

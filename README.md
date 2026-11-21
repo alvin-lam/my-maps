@@ -1,4 +1,4 @@
-# World Map
+# My Maps
 
 An interactive world map for tracking the countries you have been to. Tap a country or search for it, then mark it with a status. The map colors each country to match.
 
