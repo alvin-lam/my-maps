@@ -12,6 +12,7 @@ Live site: [mymaps.alltripsconsidered.com](https://mymaps.alltripsconsidered.com
 - **Counts and lists:** See totals for each status and a full list under "My countries".
 - **Exports:** Download your list as CSV, JSON or plain text. Download the map as PNG, JPG or SVG.
 - **Light and dark themes:** The page follows your device setting, or you can choose one.
+- **Color schemes:** The palette button offers Classic, the four seasons, Lunar New Year, Pride, Independence Day, Halloween and Christmas. "Match the calendar" switches on its own through the year.
 - **Installable app:** Install My Maps on phones, tablets and computers. It opens like an app and works offline.
 
 ## Disputed areas
