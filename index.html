@@ -5,7 +5,15 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>My Maps</title>
 <link rel="icon" type="image/png" href="assets/icon.png?v=3">
-<link rel="apple-touch-icon" href="assets/icon.png?v=3">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="description" content="Mark the countries you have visited, are planning, have lived in and live in now.">
+<meta name="theme-color" content="#f5f6f8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#12151b" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="My Maps">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif&display=swap">
@@ -26,6 +34,11 @@
   }
   var initial = saved();
   if (initial) root.setAttribute("data-theme", initial);
+  function syncThemeColor() {
+    var color = effective() === "dark" ? "#12151b" : "#f5f6f8";
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function (m) { m.setAttribute("content", color); });
+  }
+  if (initial) syncThemeColor();
   function syncButton(button) {
     var dark = effective() === "dark";
     var label = dark ? "Switch to light mode" : "Switch to dark mode";
@@ -41,7 +54,7 @@
       var next = effective() === "dark" ? "light" : "dark";
       root.setAttribute("data-theme", next);
       try { localStorage.setItem(KEY, next); } catch (e) {}
-      syncButton(button);
+      syncButton(button); syncThemeColor();
     });
     if (media && media.addEventListener) media.addEventListener("change", function () { syncButton(button); });
   });
@@ -125,6 +138,7 @@
     <footer class="disclaimer">
       <p>Data you enter is saved only in this browser.</p>
       <p>Borders are approximate and shown for general information only. Disputed and occupied areas are shown as their own entries, and their notes follow the position of the United Nations where it has one.</p>
+      <p><button type="button" class="btn btn-ghost" id="install-open" hidden>Install app</button></p>
       <img src="assets/icon.png?v=3" alt="My Maps icon" width="75" height="75" class="footer-icon">
       <p class="copyright">© <span id="copyright-year">2026</span> <a href="https://alltripsconsidered.com">AllTripsConsidered.com</a>. All rights reserved.</p>
     </footer>
@@ -137,14 +151,16 @@
   <div id="install-banner" class="install-banner" role="region" aria-label="Add to Home Screen" hidden>
     <img src="assets/icon.png?v=3" alt="" class="install-icon" width="48" height="48">
     <div class="install-text">
-      <strong>Add My Maps to your Home Screen</strong>
-      <span id="install-instructions">Tap <span class="share-glyph" aria-label="Share"></span> Share, then "Add to Home Screen".</span>
+      <strong id="install-title">Add My Maps to your Home Screen</strong>
+      <span id="install-instructions"></span>
     </div>
     <div class="install-actions">
       <button type="button" id="install-dismiss" class="btn btn-ghost">Not now</button>
       <button type="button" id="install-accept" class="btn btn-primary" hidden>Install</button>
     </div>
   </div>
+
+<div id="app-toast" class="app-toast" role="status" aria-live="polite" hidden></div>
 
 <script src="js/install.js"></script>
 <script src="js/back-to-top.js"></script>

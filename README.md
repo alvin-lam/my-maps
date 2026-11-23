@@ -12,7 +12,7 @@ Live site: [mymaps.alltripsconsidered.com](https://mymaps.alltripsconsidered.com
 - **Counts and lists:** See totals for each status and a full list under "My countries".
 - **Exports:** Download your list as CSV, JSON or plain text. Download the map as PNG, JPG or SVG.
 - **Light and dark themes:** The page follows your device setting, or you can choose one.
-- **Add to Home Screen:** Install the page like an app on phones and desktop browsers.
+- **Installable app:** Install My Maps on phones, tablets and computers. It opens like an app and works offline.
 
 ## Disputed areas
 
@@ -27,11 +27,13 @@ Your selections are saved only in your browser's local storage. Nothing is sent 
 ```
 world-map/
 ├── index.html          Page markup and the early theme script
+├── manifest.webmanifest  App name, colors and icons for installing
+├── sw.js               Service worker for offline use
 ├── css/
 │   └── styles.css      All page styles and color tokens
 ├── js/
 │   ├── map.js          Map, statuses, search and exports
-│   ├── install.js      Add to Home Screen banner
+│   ├── install.js      Install banner, offline and update messages
 │   └── back-to-top.js  Back to top button
 ├── data/
 │   └── disputed.js     Disputed and occupied area outlines
@@ -67,6 +69,10 @@ Each status appears in a few places. To add one, update all of them:
 1. `css/styles.css`: add a color token in the light and dark theme rules, then add the `.dot-*`, `.country.*` and `.status-btn` rules.
 2. `index.html`: add a count in the stats bar and a button in the chooser.
 3. `js/map.js`: add the status to `STATUSES`, `LABEL` and the `col` color map used by image exports.
+
+## Updating the app
+
+The service worker caches the site for offline use. After you change any file, raise `VERSION` in `sw.js` so installed copies download the update and offer a Reload button.
 
 ## Deployment
 
