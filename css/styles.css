@@ -258,6 +258,16 @@ body.has-install-banner { padding-bottom: var(--install-banner-height, 140px); }
 @media (max-width: 600px) { .dl-group { flex: 1 1 100%; } .dl-group .btn { flex: 1; } }
 
 /* Color schemes: set by the Appearance panel through data-scheme on <html>. */
+/* Daylight: crisp, high-contrast colors made for light mode. */
+:root[data-scheme="daylight"] { --primary: #0b6bcb; --bg: #ffffff; --surface: #ffffff; --border: #d5dbe3; --sea: #e8f2fc; --land: #d3d9e2; --land-hover: #b6bfcc; --visited: #0a9d58; --planning: #f4a100; --lived: #6c3fd1; --living: #e2334f; }
+:root[data-scheme="daylight"][data-theme="dark"] { --primary: #5aa2f0; --bg: #0f141b; --surface: #171d26; --sea: #142233; --visited: #2fc27e; --planning: #ffb933; --lived: #9a79f0; --living: #ff5c76; }
+/* Midnight: deep navy with glowing colors made for dark mode. */
+:root[data-scheme="midnight"] { --primary: #3b5bdb; --bg: #eef1f8; --sea: #dde5f5; --land: #c9d1e2; --land-hover: #aeb8cd; --visited: #12a679; --planning: #d99a0b; --lived: #7c56e0; --living: #e0456a; }
+:root[data-scheme="midnight"][data-theme="dark"] { --primary: #7aa2ff; --bg: #070b16; --surface: #0e1424; --border: #1f2a44; --text: #e6ebf7; --muted: #8c98b5; --sea: #0b1428; --land: #26324d; --land-hover: #34436a; --visited: #2ee6a6; --planning: #ffc94d; --lived: #b18cff; --living: #ff6b8b; }
+@media (prefers-color-scheme: dark) {
+  :root[data-scheme="daylight"]:not([data-theme="light"]) { --primary: #5aa2f0; --bg: #0f141b; --surface: #171d26; --sea: #142233; --visited: #2fc27e; --planning: #ffb933; --lived: #9a79f0; --living: #ff5c76; }
+  :root[data-scheme="midnight"]:not([data-theme="light"]) { --primary: #7aa2ff; --bg: #070b16; --surface: #0e1424; --border: #1f2a44; --text: #e6ebf7; --muted: #8c98b5; --sea: #0b1428; --land: #26324d; --land-hover: #34436a; --visited: #2ee6a6; --planning: #ffc94d; --lived: #b18cff; --living: #ff6b8b; }
+}
 :root[data-scheme="spring"] { --primary: #2f8f5b; --bg: #f6faf3; --sea: #e6f3f7; --visited: #3f9e5f; --planning: #e9a23b; --lived: #9b6cc4; --living: #e5738f; }
 :root[data-scheme="summer"] { --primary: #0f7f9e; --bg: #fbf8ef; --sea: #dff3f8; --visited: #12a4a0; --planning: #f6b416; --lived: #f0743e; --living: #c2306b; }
 :root[data-scheme="autumn"] { --primary: #b5541c; --bg: #faf5ee; --sea: #eef0ee; --visited: #c8681d; --planning: #d9a21b; --lived: #7d2f3a; --living: #4f6d8f; }
@@ -313,6 +323,7 @@ body.has-install-banner { padding-bottom: var(--install-banner-height, 140px); }
 .scheme-card[aria-checked="true"] { border-color: var(--primary); background: var(--bg); }
 .scheme-card svg { display: block; width: 100%; height: auto; border-radius: 6px; border: 1px solid var(--border); }
 .scheme-card .sub { display: block; font-weight: 400; color: var(--muted); font-size: .72rem; }
+.scheme-grid .grid-label { grid-column: 1 / -1; margin: 10px 0 0; font-size: .8rem; font-weight: 700; color: var(--text); }
 .scheme-card.auto { grid-column: span 3; flex-direction: row; align-items: center; text-align: left; gap: 10px; }
 .scheme-card.auto svg { width: 96px; flex: none; }
 @media (max-width: 680px) { .appearance-wrap { top: 14px; } }
