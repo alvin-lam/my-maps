@@ -2,7 +2,7 @@
   "id": "./",
   "name": "My Maps",
   "short_name": "My Maps",
-  "description": "Mark the countries you have visited, are planning, have lived in and live in now.",
+  "description": "Free interactive travel map. Mark the countries you have visited, plan to visit, have lived in and live in now, then download or share your map. Works offline.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
