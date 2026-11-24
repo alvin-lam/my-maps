@@ -87,21 +87,15 @@
     "dia-de-los-muertos": { type: "fall", items: ["🌼", "💀"] },
     thanksgiving: { type: "fall", items: ["🍂", "🍁"] }
   };
-  var decorRun = 0;
-  function decorate() {
-    var id = resolved(), d = DECOR[id], wrap = document.getElementById("map-wrap");
-    var old = document.getElementById("decor-canvas"); if (old) old.remove();
-    decorRun++;
-    if (!d || !wrap || decor === "off" || reduceMotion) return;
-    var run = decorRun, cv = document.createElement("canvas"); cv.id = "decor-canvas"; cv.className = "decor-canvas"; cv.setAttribute("aria-hidden", "true");
-    wrap.appendChild(cv);
-    var dpr = window.devicePixelRatio || 1, W = wrap.clientWidth, H = wrap.clientHeight;
-    cv.width = W * dpr; cv.height = H * dpr;
-    var ctx = cv.getContext("2d"); ctx.scale(dpr, dpr);
+  // Builds a decoration for a W x H area. step(ctx, t, dt) draws one frame; t is milliseconds since start.
+  // Shared by the live map and the animated GIF download.
+  var DURATION = 7000;
+  function makeDecor(id, W, H) {
+    var d = DECOR[id]; if (!d) return null;
     var cs = getComputedStyle(root), colors = ["--visited", "--planning", "--lived", "--living"].map(function (v) { return cs.getPropertyValue(v).trim(); });
     if (id === "new-years-eve") colors = ["#f5d061", "#e8e8f0", "#c9a227", "#b18cff"];
     if (id === "independence-day") colors = ["#e0303f", "#ffffff", "#3c6fd6", "#e0303f"];
-    var parts = [], DURATION = 7000, start = performance.now(), nextBurst = 0;
+    var parts = [], nextBurst = 0;
     function rnd(a, b) { return a + Math.random() * (b - a); }
     if (d.type !== "fireworks") {
       for (var i = 0; i < 26; i++) parts.push({ x: rnd(0, W), y: d.type === "fall" ? rnd(-H * .5, H * .4) : rnd(H * .6, H * 1.5), s: rnd(14, 24), v: rnd(45, 85), w: rnd(0, 6.28), t: d.items[i % d.items.length] });
@@ -110,28 +104,52 @@
       var x = rnd(W * .15, W * .85), y = rnd(H * .15, H * .5), c = colors[Math.floor(Math.random() * colors.length)];
       for (var k = 0; k < 40; k++) { var a = k / 40 * 6.28, sp = rnd(40, 110); parts.push({ x: x, y: y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 1, c: c }); }
     }
-    var last = start;
+    return {
+      duration: DURATION,
+      step: function (ctx, t, dt) {
+        var fade = t > DURATION - 1500 ? Math.max(0, (DURATION - t) / 1500) : 1;
+        ctx.save();
+        if (d.type === "fireworks") {
+          if (t < DURATION - 1800 && t > nextBurst) { burst(); nextBurst = t + rnd(450, 900); }
+          parts = parts.filter(function (p) { return p.life > 0; });
+          parts.forEach(function (p) {
+            p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 60 * dt; p.life -= dt * .9;
+            ctx.globalAlpha = Math.max(0, p.life) * fade; ctx.fillStyle = p.c;
+            ctx.beginPath(); ctx.arc(p.x, p.y, 2.2, 0, 6.28); ctx.fill();
+          });
+        } else {
+          ctx.textAlign = "center"; ctx.textBaseline = "middle";
+          parts.forEach(function (p) {
+            p.y += (d.type === "fall" ? 1 : -1) * p.v * dt; p.w += dt; p.x += Math.sin(p.w) * 12 * dt;
+            ctx.globalAlpha = .85 * fade; ctx.font = p.s + "px system-ui, sans-serif"; ctx.fillText(p.t, p.x, p.y);
+          });
+        }
+        ctx.restore();
+      }
+    };
+  }
+  window.MyMapsDecor = { make: function (W, H) { return makeDecor(resolved(), W, H); }, label: function () { return byId[resolved()]; } };
+
+  var decorRun = 0;
+  function decorate() {
+    var wrap = document.getElementById("map-wrap");
+    var old = document.getElementById("decor-canvas"); if (old) old.remove();
+    decorRun++;
+    if (!wrap || decor === "off" || reduceMotion) return;
+    var W = wrap.clientWidth, H = wrap.clientHeight, dec = makeDecor(resolved(), W, H);
+    if (!dec) return;
+    var run = decorRun, cv = document.createElement("canvas"); cv.id = "decor-canvas"; cv.className = "decor-canvas"; cv.setAttribute("aria-hidden", "true");
+    wrap.appendChild(cv);
+    var dpr = window.devicePixelRatio || 1;
+    cv.width = W * dpr; cv.height = H * dpr;
+    var ctx = cv.getContext("2d"); ctx.scale(dpr, dpr);
+    var start = performance.now(), last = start;
     function frame(now) {
       if (run !== decorRun) return;
       var t = now - start, dt = Math.min(.05, (now - last) / 1000); last = now;
-      var fade = t > DURATION - 1500 ? Math.max(0, (DURATION - t) / 1500) : 1;
       ctx.clearRect(0, 0, W, H);
-      if (d.type === "fireworks") {
-        if (t < DURATION - 1800 && t > nextBurst) { burst(); nextBurst = t + rnd(450, 900); }
-        parts = parts.filter(function (p) { return p.life > 0; });
-        parts.forEach(function (p) {
-          p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 60 * dt; p.life -= dt * .9;
-          ctx.globalAlpha = Math.max(0, p.life) * fade; ctx.fillStyle = p.c;
-          ctx.beginPath(); ctx.arc(p.x, p.y, 2.2, 0, 6.28); ctx.fill();
-        });
-      } else {
-        ctx.textAlign = "center"; ctx.textBaseline = "middle";
-        parts.forEach(function (p) {
-          p.y += (d.type === "fall" ? 1 : -1) * p.v * dt; p.w += dt; p.x += Math.sin(p.w) * 12 * dt;
-          ctx.globalAlpha = .85 * fade; ctx.font = p.s + "px system-ui, sans-serif"; ctx.fillText(p.t, p.x, p.y);
-        });
-      }
-      if (t < DURATION) requestAnimationFrame(frame); else cv.remove();
+      dec.step(ctx, t, dt);
+      if (t < dec.duration) requestAnimationFrame(frame); else cv.remove();
     }
     requestAnimationFrame(frame);
   }

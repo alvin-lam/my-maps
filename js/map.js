@@ -242,7 +242,7 @@
       return;
     }
 
-    var scale = 2, canvas = document.createElement("canvas"); canvas.width = W * scale; canvas.height = TH * scale;
+    var scale = fmt === "gif" ? 1 : 2, canvas = document.createElement("canvas"); canvas.width = W * scale; canvas.height = TH * scale;
     var ctx = canvas.getContext("2d"); ctx.scale(scale, scale);
     ctx.fillStyle = v("--surface"); ctx.fillRect(0, 0, W, TH);
     ctx.fillStyle = v("--sea"); ctx.fillRect(0, padTop, W, H);
@@ -263,8 +263,50 @@
       ctx.fillStyle = col[it.s]; ctx.beginPath(); ctx.arc(cx + 6, cy - 5, 6, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = v("--text"); ctx.fillText(it.t, cx + 20, cy); cx += widths[i] + gap;
     });
+    if (fmt === "gif") { makeGif(canvas, padTop); return; }
     var jpg = fmt === "jpg";
     canvas.toBlob(function (b) { saveBlob(b, "my-maps." + fmt); }, jpg ? "image/jpeg" : "image/png", jpg ? 0.92 : undefined);
+  }
+
+  // Animated GIF: the map image with the current holiday decoration playing over the map area.
+  // The encoder (gifenc) loads only when someone asks for a GIF.
+  var gifBusy = false;
+  function gifToast(text) {
+    var t = document.getElementById("app-toast"); if (!t) return;
+    t.innerHTML = ""; var s = document.createElement("span"); s.textContent = text; t.appendChild(s); t.hidden = !text;
+  }
+  function makeGif(base, mapTop) {
+    if (gifBusy) return; gifBusy = true;
+    var dec = window.MyMapsDecor && window.MyMapsDecor.make(W, H);
+    gifToast(dec ? "Making your animated GIF…" : "Making your GIF…");
+    import("https://cdn.jsdelivr.net/npm/gifenc@1.0.3/dist/gifenc.esm.js").then(function (g) {
+      var fw = base.width, fh = base.height, frame = document.createElement("canvas");
+      frame.width = fw; frame.height = fh;
+      var ctx = frame.getContext("2d", { willReadFrequently: true }), enc = g.GIFEncoder();
+      var FPS = 12, delay = Math.round(1000 / FPS), total = dec ? Math.ceil(dec.duration / delay) : 1, i = 0;
+      function addFrame() {
+        ctx.drawImage(base, 0, 0);
+        if (dec) {
+          ctx.save(); ctx.beginPath(); ctx.rect(0, mapTop, W, H); ctx.clip(); ctx.translate(0, mapTop);
+          dec.step(ctx, i * delay, delay / 1000);
+          ctx.restore();
+        }
+        var rgba = ctx.getImageData(0, 0, fw, fh).data;
+        var palette = g.quantize(rgba, 256, { format: "rgb444" });
+        enc.writeFrame(g.applyPalette(rgba, palette, "rgb444"), fw, fh, { palette: palette, delay: delay, repeat: 0 });
+      }
+      function work() {
+        var until = performance.now() + 40;
+        while (i < total && performance.now() < until) { addFrame(); i++; }
+        if (i < total) { gifToast("Making your animated GIF… " + Math.round(i / total * 100) + "%"); setTimeout(work, 0); return; }
+        // Hold the last frame (plain map) so the loop pauses before it starts again.
+        if (dec) { ctx.drawImage(base, 0, 0); var rgba = ctx.getImageData(0, 0, fw, fh).data, pal = g.quantize(rgba, 256, { format: "rgb444" }); enc.writeFrame(g.applyPalette(rgba, pal, "rgb444"), fw, fh, { palette: pal, delay: 1500 }); }
+        enc.finish();
+        saveBlob(new Blob([enc.bytes()], { type: "image/gif" }), "my-maps.gif");
+        gifToast(""); gifBusy = false;
+      }
+      work();
+    }).catch(function () { gifToast("Couldn't make the GIF. Check your connection and try again."); gifBusy = false; setTimeout(function () { gifToast(""); }, 4000); });
   }
 
   // Format menus
