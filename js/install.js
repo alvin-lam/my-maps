@@ -76,6 +76,8 @@
     if (snooze) set(SNOOZE_KEY, String(Date.now() + SNOOZE_DAYS * 864e5));
   }
   function snoozed() { return Number(get(SNOOZE_KEY) || 0) > Date.now(); }
+  // Lets other parts of the page open the install steps, for example when a download is not possible.
+  window.MyMapsInstall = { available: function () { return !standalone() && !!method(); }, show: show };
   function syncOpenBtn() { if (openBtn) openBtn.hidden = standalone() || !method(); }
 
   // Ask only after the visitor has spent some time on the page or marked a country.

@@ -124,7 +124,7 @@ h2 { font-size: 1.15rem; margin: 0; }
 .btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
 
 /* Footer: disclaimer, 75px app icon, serif copyright */
-.disclaimer { color: var(--muted); font-size: .85rem; }
+.disclaimer { color: var(--muted); font-size: .85rem; text-align: center; max-width: 720px; margin-inline: auto; }
 .disclaimer p { margin: 0 0 6px; }
 .footer-icon { display: block; width: 75px; height: 75px; margin: 24px auto 0; }
 .copyright {
@@ -196,6 +196,8 @@ body.has-install-banner { padding-bottom: var(--install-banner-height, 140px); }
   .card { padding: 16px; }
   .disclaimer { font-size: .9rem; }
   .card-footer .btn { flex: 1; }
+  .card-footer { display: grid; grid-template-columns: 1fr 1fr; }
+  .card-footer > .btn, .card-footer > .dl-group { width: 100%; }
 }
 
 /* World map */
@@ -255,7 +257,7 @@ body.has-install-banner { padding-bottom: var(--install-banner-height, 140px); }
 .dl-menu button { display: flex; width: 100%; justify-content: space-between; align-items: center; gap: 12px; font: inherit; font-weight: 600; padding: 10px 12px; min-height: 40px; border: 0; border-radius: 6px; background: transparent; color: var(--text); cursor: pointer; text-align: left; }
 .dl-menu button span { font-weight: 400; font-size: .85rem; color: var(--muted); }
 .dl-menu button:hover, .dl-menu button:focus-visible { background: var(--bg); outline: none; }
-@media (max-width: 600px) { .dl-group { flex: 1 1 100%; } .dl-group .btn { flex: 1; } }
+@media (max-width: 600px) { .dl-group .btn { flex: 1; } .card-footer > .dl-group:nth-child(odd) .dl-menu { right: auto; left: 0; } }
 
 /* Color schemes: set by the Appearance panel through data-scheme on <html>. */
 /* Daylight: crisp, high-contrast colors made for light mode. */
@@ -391,3 +393,9 @@ body.has-install-banner { padding-bottom: var(--install-banner-height, 140px); }
 :root[data-mapstyle="vintage"] #map .country.living { fill: color-mix(in srgb, var(--living) 75%, #8b6b3d); }
 :root[data-mapstyle="vintage"] .map-wrap { background-image: radial-gradient(ellipse at center, transparent 55%, rgba(120, 90, 40, .18)); }
 @media (prefers-reduced-motion: reduce) { #map .country { transition: none; } }
+
+/* Status counts: one even row on phones, two rows on the narrowest screens */
+@media (max-width: 600px) { .stats { display: grid; grid-template-columns: repeat(4, auto); justify-content: space-between; gap: 8px 10px; font-size: .9rem; } }
+@media (max-width: 359px) { .stats { grid-template-columns: repeat(2, auto); justify-content: start; gap: 8px 24px; } }
+/* Messages: centered, as wide as their text up to a comfortable limit */
+.app-toast { left: 16px; right: 16px; transform: none; width: fit-content; max-width: min(560px, calc(100% - 32px)); margin-inline: auto; }

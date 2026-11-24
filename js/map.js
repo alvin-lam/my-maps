@@ -131,7 +131,29 @@
   document.getElementById("zoom-reset").addEventListener("click", function () { svg.transition().call(zoom.transform, d3.zoomIdentity); });
 
   // Downloads
+  // Some browsers cannot save files, mainly apps' built-in browsers and older iPhones.
+  // There, offer the share sheet when possible, and remind the visitor to Add to Home Screen.
+  var IN_APP = /FBAN|FBAV|Instagram|Line\/|GSA\/|Snapchat|TikTok|musical_ly|Twitter|LinkedInApp|Pinterest/i.test(navigator.userAgent);
+  var CAN_DOWNLOAD = "download" in document.createElement("a") && !IN_APP;
+  function cannotDownload(blob, name) {
+    var file = window.File ? new File([blob], name, { type: blob.type }) : null;
+    if (file && navigator.canShare && navigator.canShare({ files: [file] })) navigator.share({ files: [file], title: "My Maps" }).catch(function () {});
+    var t = document.getElementById("app-toast"); if (!t) return;
+    t.innerHTML = "";
+    var s = document.createElement("span");
+    s.textContent = IN_APP ? "This app's browser can't save files. Open My Maps in your phone's browser and add it to your Home Screen." : "This browser can't save files. Add My Maps to your Home Screen to save your maps and lists.";
+    t.appendChild(s);
+    if (window.MyMapsInstall && window.MyMapsInstall.available()) {
+      var b = document.createElement("button"); b.type = "button"; b.className = "btn btn-primary"; b.textContent = "Show me";
+      b.addEventListener("click", function () { t.hidden = true; window.MyMapsInstall.show(); });
+      t.appendChild(b);
+    }
+    var x = document.createElement("button"); x.type = "button"; x.className = "btn btn-ghost"; x.textContent = "OK";
+    x.addEventListener("click", function () { t.hidden = true; }); t.appendChild(x);
+    t.hidden = false;
+  }
   function saveBlob(blob, name) {
+    if (!CAN_DOWNLOAD) { cannotDownload(blob, name); return; }
     var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name;
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
