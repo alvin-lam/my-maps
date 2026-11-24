@@ -218,7 +218,7 @@
     var cs = getComputedStyle(document.documentElement);
     function v(n) { return cs.getPropertyValue(n).trim(); }
     var col = { none: v("--land"), visited: v("--visited"), planning: v("--planning"), lived: v("--lived"), living: v("--living") };
-    var padTop = 90, padBottom = 70, TH = H + padTop + padBottom;
+    var padTop = 90, padBottom = 100, TH = H + padTop + padBottom, SITE = "mymaps.alltripsconsidered.com";
     var items = grouped().map(function (g) { return { s: g.s, t: LABEL[g.s] + " " + g.names.length }; });
 
     if (fmt === "svg") {
@@ -237,6 +237,7 @@
         o.push('<circle cx="' + (x + 6) + '" cy="' + (y - 5) + '" r="6" fill="' + col[it.s] + '"/><text x="' + (x + 20) + '" y="' + y + '" font-family="' + font + '" font-size="16" fill="' + v("--text") + '">' + it.t + '</text>');
         x += 130;
       });
+      o.push('<text x="' + W / 2 + '" y="' + (TH - 22) + '" text-anchor="middle" font-family="' + font + '" font-size="14" fill="' + v("--muted") + '">' + SITE + '</text>');
       o.push('</svg>');
       saveBlob(new Blob([o.join("\n")], { type: "image/svg+xml" }), "my-maps.svg");
       return;
@@ -263,6 +264,7 @@
       ctx.fillStyle = col[it.s]; ctx.beginPath(); ctx.arc(cx + 6, cy - 5, 6, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = v("--text"); ctx.fillText(it.t, cx + 20, cy); cx += widths[i] + gap;
     });
+    ctx.textAlign = "center"; ctx.fillStyle = v("--muted"); ctx.font = "14px system-ui, -apple-system, sans-serif"; ctx.fillText(SITE, W / 2, TH - 22);
     if (fmt === "gif") { makeGif(canvas, padTop); return; }
     var jpg = fmt === "jpg";
     canvas.toBlob(function (b) { if (onBlob) onBlob(b); else saveBlob(b, "my-maps." + fmt); }, jpg ? "image/jpeg" : "image/png", jpg ? 0.92 : undefined);
