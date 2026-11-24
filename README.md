@@ -50,13 +50,14 @@ Dates, numbers and A to Z sorting follow the device's language and region settin
 
 ## Privacy
 
-Your selections and settings are saved only in your browser's local storage. Nothing is sent to a server. Clearing your browser data will clear your map.
+Your selections and settings are saved only in your browser's local storage. Nothing is sent to a server. Clearing your browser data will clear your map. The full policy is on the [Privacy page](https://mymaps.alltripsconsidered.com/privacy.html) (`privacy.html`), linked from the footer. Update it before adding anything that collects information, such as analytics.
 
 ## Project structure
 
 ```
 my-maps/
 ├── index.html            Page markup
+├── privacy.html          Privacy page
 ├── manifest.webmanifest  App name, colors and icons for installing
 ├── sw.js                 Service worker for offline use
 ├── css/
@@ -156,6 +157,15 @@ The page has a descriptive title and description, a canonical link, Open Graph a
 ## Deployment
 
 GitHub Pages serves the site from the repository's publishing branch. The `CNAME` file points it to the custom domain.
+
+## Roadmap
+
+1. **Import and backup:** Add an Import button that loads an exported JSON file, so visitors can restore their map after clearing their browser or switching devices. Remind visitors to back up after they mark 10 or more places.
+2. **Real-device testing:** Confirm on real phones that downloads and sharing work in Safari, Chrome and the installed app, that Add to Home Screen works on iPhone and Android, and that the app opens offline. Check the Diwali dates from 2028 onward against a calendar.
+3. **Self-hosted libraries:** Serve D3 and the TopoJSON reader from the site instead of jsDelivr, ideally with only the D3 parts the map uses, so the map draws even when the CDN is slow or blocked.
+4. **Accessibility review:** Check color contrast in every scheme, especially holiday schemes in dark mode and the Vintage style. Add a "Skip to search" link so keyboard users do not have to tab through every country, and make sure counts and messages are announced by screen readers.
+5. **Repository housekeeping:** Confirm GitHub Pages publishes from `prod`, redirect the old `world.alltripsconsidered.com` address, and update local checkouts to the renamed repository.
+6. **Search and growth:** Add a "How it works" and FAQ section with FAQ structured data, a 404 page, shareable map links, links to My Maps from alltripsconsidered.com, and submit the sitemap in Google Search Console and Bing Webmaster Tools.
 
 ## License
 

@@ -399,3 +399,5 @@ body.has-install-banner { padding-bottom: var(--install-banner-height, 140px); }
 @media (max-width: 359px) { .stats { grid-template-columns: repeat(2, auto); justify-content: start; gap: 8px 24px; } }
 /* Messages: centered, as wide as their text up to a comfortable limit */
 .app-toast { left: 16px; right: 16px; transform: none; width: fit-content; max-width: min(560px, calc(100% - 32px)); margin-inline: auto; }
+.disclaimer a { color: inherit; text-decoration: underline; }
+.disclaimer a:hover, .disclaimer a:focus-visible { color: var(--text); }
