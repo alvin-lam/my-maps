@@ -12,6 +12,9 @@ Live site: [mymaps.alltripsconsidered.com](https://mymaps.alltripsconsidered.com
 - **Counts and lists:** See totals for each status and a full list under "My countries".
 - **Exports:** Download your list as CSV, JSON or plain text. Download the map as PNG, JPG or SVG.
 - **Appearance:** One button opens a panel for System, Light or Dark mode and the color scheme. "Automatic" is the default and follows the seasons and holidays (New Year's Eve, Lunar New Year, Valentine's Day, St. Patrick's Day, Earth Day, Pride, Independence Day, Halloween, Diwali, Thanksgiving and Christmas). Holi, Día de los Muertos and Hanukkah can be picked by hand. Classic and each season or holiday can also be picked by hand.
+- **Map styles:** Flat, Outline (tinted fill with a bold border) or Vintage (parchment tones).
+- **Holiday decorations:** A short animation plays over the map during holidays, such as falling snow at Christmas or fireworks on New Year's Eve. It can be turned off, and it stays off on devices set to reduce motion.
+- **Hemisphere:** Seasons follow the northern or southern hemisphere, guessed from the time zone until chosen.
 - **Installable app:** Install My Maps on phones, tablets and computers. It opens like an app and works offline.
 
 ## Disputed areas

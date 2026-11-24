@@ -16,6 +16,12 @@
   var LUNAR = { 2025: [0, 29], 2026: [1, 17], 2027: [1, 6], 2028: [0, 26], 2029: [1, 13], 2030: [1, 3], 2031: [0, 23], 2032: [1, 11], 2033: [0, 31], 2034: [1, 19], 2035: [1, 8] };
 
   function get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  // Guess the hemisphere from the time zone until the visitor picks one.
+  function guessHemi() {
+    var tz = ""; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) {}
+    return /^(Australia|Antarctica)\/|^Pacific\/(Auckland|Chatham|Fiji|Tongatapu|Apia|Noumea|Efate|Pago_Pago|Rarotonga|Tahiti|Norfolk)|^America\/(Argentina|Santiago|Sao_Paulo|Montevideo|Asuncion|Lima|La_Paz|Punta_Arenas|Campo_Grande|Cuiaba|Porto_Velho|Recife|Bahia|Maceio|Fortaleza|Belem)|^Africa\/(Johannesburg|Maputo|Harare|Lusaka|Windhoek|Gaborone|Maseru|Mbabane|Blantyre|Lubumbashi|Luanda|Dar_es_Salaam|Kigali|Bujumbura)|^Indian\/(Mauritius|Reunion|Antananarivo|Mayotte|Comoro)|^Atlantic\/(Stanley|St_Helena)/.test(tz) ? "south" : "north";
+  }
+  var hemi = (function () { var v = null; try { v = localStorage.getItem("my-maps-hemisphere"); } catch (e) {} return v === "north" || v === "south" ? v : guessHemi(); })();
   function set(k, v) { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
 
   function near(d, y, md, before, after) {
@@ -38,6 +44,8 @@
     if (m === 9 && day >= 15) return "halloween";
     if ((m === 5 && day >= 28) || (m === 6 && day <= 5)) return "independence-day";
     if (m === 5) return "pride";
+    // Seasons flip for the southern hemisphere; holidays stay on their dates.
+    if (hemi === "south") m = (m + 6) % 12;
     if (m >= 2 && m <= 4) return "spring";
     if (m >= 5 && m <= 7) return "summer";
     if (m >= 8 && m <= 10) return "autumn";
@@ -45,6 +53,9 @@
   }
 
   var mode = get(THEME_KEY); if (mode !== "light" && mode !== "dark") mode = "system";
+  var mapStyle = get("my-maps-map-style"); if (mapStyle !== "outline" && mapStyle !== "vintage") mapStyle = "flat";
+  var decor = get("my-maps-decorations") === "off" ? "off" : "on";
+  var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var scheme = get(SCHEME_KEY); if (scheme !== "auto" && !byId[scheme]) scheme = "auto";
   function resolved() { return scheme === "auto" ? forDate(new Date()) : scheme; }
 
@@ -56,7 +67,74 @@
     document.querySelectorAll('meta[name="theme-color"]').forEach(function (m) { m.setAttribute("content", c); });
   }
   window.syncThemeColor = syncThemeColor;
-  applyMode(); applyScheme();
+  function applyMapStyle() { if (mapStyle === "flat") root.removeAttribute("data-mapstyle"); else root.setAttribute("data-mapstyle", mapStyle); }
+  applyMode(); applyScheme(); applyMapStyle();
+
+  // Holiday decorations: a short, gentle animation over the map when a holiday scheme is on.
+  var DECOR = {
+    christmas: { type: "fall", items: ["❄️", "❄"] },
+    hanukkah: { type: "fall", items: ["✨", "❄"] },
+    "new-years-eve": { type: "fireworks" },
+    "independence-day": { type: "fireworks" },
+    holi: { type: "fireworks" },
+    "valentines-day": { type: "rise", items: ["💗", "💕", "❤️"] },
+    diwali: { type: "rise", items: ["✨", "🪔"] },
+    halloween: { type: "rise", items: ["🦇", "🎃"] },
+    "lunar-new-year": { type: "fall", items: ["🧧", "✨"] },
+    "st-patricks-day": { type: "fall", items: ["☘️", "🍀"] },
+    "earth-day": { type: "fall", items: ["🍃", "🌱"] },
+    pride: { type: "fall", items: ["🏳️‍🌈", "✨"] },
+    "dia-de-los-muertos": { type: "fall", items: ["🌼", "💀"] },
+    thanksgiving: { type: "fall", items: ["🍂", "🍁"] }
+  };
+  var decorRun = 0;
+  function decorate() {
+    var id = resolved(), d = DECOR[id], wrap = document.getElementById("map-wrap");
+    var old = document.getElementById("decor-canvas"); if (old) old.remove();
+    decorRun++;
+    if (!d || !wrap || decor === "off" || reduceMotion) return;
+    var run = decorRun, cv = document.createElement("canvas"); cv.id = "decor-canvas"; cv.className = "decor-canvas"; cv.setAttribute("aria-hidden", "true");
+    wrap.appendChild(cv);
+    var dpr = window.devicePixelRatio || 1, W = wrap.clientWidth, H = wrap.clientHeight;
+    cv.width = W * dpr; cv.height = H * dpr;
+    var ctx = cv.getContext("2d"); ctx.scale(dpr, dpr);
+    var cs = getComputedStyle(root), colors = ["--visited", "--planning", "--lived", "--living"].map(function (v) { return cs.getPropertyValue(v).trim(); });
+    if (id === "new-years-eve") colors = ["#f5d061", "#e8e8f0", "#c9a227", "#b18cff"];
+    if (id === "independence-day") colors = ["#e0303f", "#ffffff", "#3c6fd6", "#e0303f"];
+    var parts = [], DURATION = 7000, start = performance.now(), nextBurst = 0;
+    function rnd(a, b) { return a + Math.random() * (b - a); }
+    if (d.type !== "fireworks") {
+      for (var i = 0; i < 26; i++) parts.push({ x: rnd(0, W), y: d.type === "fall" ? rnd(-H * .5, H * .4) : rnd(H * .6, H * 1.5), s: rnd(14, 24), v: rnd(45, 85), w: rnd(0, 6.28), t: d.items[i % d.items.length] });
+    }
+    function burst() {
+      var x = rnd(W * .15, W * .85), y = rnd(H * .15, H * .5), c = colors[Math.floor(Math.random() * colors.length)];
+      for (var k = 0; k < 40; k++) { var a = k / 40 * 6.28, sp = rnd(40, 110); parts.push({ x: x, y: y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 1, c: c }); }
+    }
+    var last = start;
+    function frame(now) {
+      if (run !== decorRun) return;
+      var t = now - start, dt = Math.min(.05, (now - last) / 1000); last = now;
+      var fade = t > DURATION - 1500 ? Math.max(0, (DURATION - t) / 1500) : 1;
+      ctx.clearRect(0, 0, W, H);
+      if (d.type === "fireworks") {
+        if (t < DURATION - 1800 && t > nextBurst) { burst(); nextBurst = t + rnd(450, 900); }
+        parts = parts.filter(function (p) { return p.life > 0; });
+        parts.forEach(function (p) {
+          p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 60 * dt; p.life -= dt * .9;
+          ctx.globalAlpha = Math.max(0, p.life) * fade; ctx.fillStyle = p.c;
+          ctx.beginPath(); ctx.arc(p.x, p.y, 2.2, 0, 6.28); ctx.fill();
+        });
+      } else {
+        ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        parts.forEach(function (p) {
+          p.y += (d.type === "fall" ? 1 : -1) * p.v * dt; p.w += dt; p.x += Math.sin(p.w) * 12 * dt;
+          ctx.globalAlpha = .85 * fade; ctx.font = p.s + "px system-ui, sans-serif"; ctx.fillText(p.t, p.x, p.y);
+        });
+      }
+      if (t < DURATION) requestAnimationFrame(frame); else cv.remove();
+    }
+    requestAnimationFrame(frame);
+  }
 
   // A small stylized map in a scheme's colors, used on each card.
   function preview(s) {
@@ -88,7 +166,20 @@
     // Sea color for previews, read from the stylesheet rules for each scheme.
     SCHEMES.forEach(function (s) { s.seaColor = { classic: "#eaf1fb", daylight: "#e8f2fc", midnight: "#0f1a33", spring: "#e6f3f7", summer: "#dff3f8", autumn: "#eef0ee", winter: "#e3edf8", "lunar-new-year": "#f7ece4", pride: "#eef0fb", "independence-day": "#e5ecf8", halloween: "#ece7f1", christmas: "#eaf1ee", "valentines-day": "#fbe9ef", "st-patricks-day": "#e4f2e6", "holi": "#f2eefb", "earth-day": "#dcecf7", "dia-de-los-muertos": "#efe9f3", "diwali": "#f8ece0", "thanksgiving": "#efebe4", "hanukkah": "#e3ebf8", "new-years-eve": "#e6e9f2" }[s.id]; });
 
-    var modeBtns = Array.prototype.slice.call(panel.querySelectorAll(".mode-switch button"));
+    var modeBtns = Array.prototype.slice.call(panel.querySelectorAll(".mode-switch button[data-mode]"));
+    var styleBtns = Array.prototype.slice.call(panel.querySelectorAll("[data-mapstyle]"));
+    var hemiBtns = Array.prototype.slice.call(panel.querySelectorAll("[data-hemi]"));
+    var decorBtns = Array.prototype.slice.call(panel.querySelectorAll("[data-decor]"));
+    styleBtns.forEach(function (b) {
+      b.addEventListener("click", function () { mapStyle = b.dataset.mapstyle; set("my-maps-map-style", mapStyle === "flat" ? null : mapStyle); applyMapStyle(); sync(); });
+    });
+    hemiBtns.forEach(function (b) {
+      b.addEventListener("click", function () { hemi = b.dataset.hemi; set("my-maps-hemisphere", hemi); applyScheme(); sync(); });
+    });
+    decorBtns.forEach(function (b) {
+      b.addEventListener("click", function () { decor = b.dataset.decor; set("my-maps-decorations", decor === "off" ? "off" : null); sync(); decorate(); });
+    });
+    if (reduceMotion) { decorBtns.forEach(function (b) { b.disabled = true; }); document.getElementById("decor-note").hidden = false; }
     modeBtns.forEach(function (b) {
       b.addEventListener("click", function () { mode = b.dataset.mode; set(THEME_KEY, mode === "system" ? null : mode); applyMode(); sync(); });
     });
@@ -119,6 +210,9 @@
     function sync() {
       var r = resolved();
       modeBtns.forEach(function (b) { b.setAttribute("aria-checked", String(b.dataset.mode === mode)); });
+      styleBtns.forEach(function (b) { b.setAttribute("aria-checked", String(b.dataset.mapstyle === mapStyle)); });
+      hemiBtns.forEach(function (b) { b.setAttribute("aria-checked", String(b.dataset.hemi === hemi)); });
+      decorBtns.forEach(function (b) { b.setAttribute("aria-checked", String(b.dataset.decor === (reduceMotion ? "off" : decor))); });
       cards.forEach(function (c) { c.setAttribute("aria-checked", String(c.dataset.scheme === scheme)); });
       autoSub.textContent = "Today: " + byId[forDate(new Date())].label + ". Changes with the seasons and holidays.";
       if (emoji) emoji.textContent = byId[r].emoji;
@@ -126,7 +220,7 @@
       btn.setAttribute("aria-label", label); btn.setAttribute("title", label);
       syncThemeColor();
     }
-    function choose(id) { scheme = id; set(SCHEME_KEY, id); applyScheme(); sync(); }
+    function choose(id) { scheme = id; set(SCHEME_KEY, id); applyScheme(); sync(); decorate(); }
 
     function open() {
       panel.hidden = false; if (backdrop) backdrop.hidden = false; btn.setAttribute("aria-expanded", "true");
@@ -149,7 +243,9 @@
         });
       });
     }
-    arrows(modeBtns, 3); arrows(cards, 3);
+    arrows(modeBtns, 3); arrows(styleBtns, 3); arrows(hemiBtns, 2); arrows(decorBtns, 2); arrows(cards, 3);
+    // Play the decoration once the map has loaded.
+    setTimeout(decorate, 1200);
     if (media && media.addEventListener) media.addEventListener("change", sync);
     sync();
 
