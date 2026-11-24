@@ -44,6 +44,10 @@ One button opens the Appearance panel.
 - **Installable:** Install My Maps on phones, tablets and computers. It opens like an app and works offline.
 - **Updates:** When a new version is ready, the app offers a Reload button.
 
+## Language and region
+
+Dates, numbers and A to Z sorting follow the device's language and region settings. Holidays and seasons use the device's local date and time zone. The site shows no distances or other measurements, so there are no units to convert.
+
 ## Privacy
 
 Your selections and settings are saved only in your browser's local storage. Nothing is sent to a server. Clearing your browser data will clear your map.

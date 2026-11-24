@@ -5,6 +5,11 @@
   var LABEL = { visited: "Visited", planning: "Planning", lived: "Lived", living: "Living" };
   var data = load();
   var countries = [], byId = {}, selectedId = null;
+  // Numbers, dates and sorting follow the device's language and region settings.
+  var fmtNum = function (n) { try { return new Intl.NumberFormat().format(n); } catch (e) { return String(n); } };
+  var fmtDate = function (d) { try { return d.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" }); } catch (e) { return d.toDateString(); } };
+  var collator = (window.Intl && Intl.Collator) ? new Intl.Collator(undefined, { sensitivity: "base" }) : null;
+  var byName = function (a, b) { return collator ? collator.compare(a, b) : a.localeCompare(b); };
   // Place details come from data/places.json, keyed by the same key saved in visitors' browsers.
   // Built by scripts/build-map.mjs, which also splits territories, adds tiny places and cuts out disputed areas.
   function codes(c) { var p = c.properties; return p.c2 ? { a2: p.c2, a3: p.c3, flag: p.f } : null; }
@@ -51,7 +56,7 @@
       byId[f.key] = f;
     });
     projection.fitExtent([[6, 6], [W - 6, H - 6]], fc);
-    countries = fc.features.slice().sort(function (a, b) { return a.properties.name.localeCompare(b.properties.name); });
+    countries = fc.features.slice().sort(function (a, b) { return byName(a.properties.name, b.properties.name); });
     g.selectAll("path").data(fc.features).join("path")
       .attr("d", path).attr("tabindex", 0)
       .attr("role", "button").attr("aria-label", function (d) { return d.properties.name; });
@@ -73,14 +78,14 @@
   function render() {
     if (pathsSel) pathsSel.attr("class", function (d) { return "country" + (this.tagName === "circle" ? " marker" : "") + (data[d.key] ? " " + data[d.key] : "") + (d.key === selectedId ? " selected" : ""); });
     STATUSES.forEach(function (s) {
-      document.getElementById("count-" + s).textContent = Object.keys(data).filter(function (k) { return data[k] === s && byId[k]; }).length;
+      document.getElementById("count-" + s).textContent = fmtNum(Object.keys(data).filter(function (k) { return data[k] === s && byId[k]; }).length);
     });
     var grid = document.getElementById("lists-grid"); grid.innerHTML = "";
     STATUSES.forEach(function (s) {
       var col = document.createElement("div");
       var h = document.createElement("h3"); h.innerHTML = '<i class="dot dot-' + s + '"></i>'; h.appendChild(document.createTextNode(LABEL[s])); col.appendChild(h);
       var names = countries.filter(function (c) { return data[c.key] === s; }).map(fullName);
-      var n = document.createElement("span"); n.className = "lists-count"; n.textContent = names.length; h.appendChild(n);
+      var n = document.createElement("span"); n.className = "lists-count"; n.textContent = fmtNum(names.length); h.appendChild(n);
       if (!names.length) { var p = document.createElement("p"); p.className = "none"; p.textContent = "None yet"; col.appendChild(p); }
       else { var ul = document.createElement("ul"); names.forEach(function (n) { var li = document.createElement("li"); li.textContent = n; ul.appendChild(li); }); col.appendChild(ul); }
       grid.appendChild(col);
@@ -143,8 +148,8 @@
       var obj = {}; groups.forEach(function (g) { obj[g.s] = g.items; });
       out = JSON.stringify(obj, null, 2); type = "application/json";
     } else if (fmt === "txt") {
-      out = "My Countries\n\n" + groups.map(function (g) {
-        return LABEL[g.s] + " (" + g.names.length + ")\n" + (g.names.length ? g.names.map(function (n) { return "- " + n; }).join("\n") : "- None");
+      out = "My Countries\n" + fmtDate(new Date()) + "\n\n" + groups.map(function (g) {
+        return LABEL[g.s] + " (" + fmtNum(g.names.length) + ")\n" + (g.names.length ? g.names.map(function (n) { return "- " + n; }).join("\n") : "- None");
       }).join("\n\n") + "\n"; type = "text/plain;charset=utf-8";
     } else {
       var rows = [["Country", "Alpha-2", "Alpha-3", "Flag", "Status"]];
@@ -162,7 +167,7 @@
     function v(n) { return cs.getPropertyValue(n).trim(); }
     var col = { none: v("--land"), visited: v("--visited"), planning: v("--planning"), lived: v("--lived"), living: v("--living") };
     var padTop = 90, padBottom = 100, TH = H + padTop + padBottom, SITE = "mymaps.alltripsconsidered.com";
-    var items = grouped().map(function (g) { return { s: g.s, t: LABEL[g.s] + " " + g.names.length }; });
+    var items = grouped().map(function (g) { return { s: g.s, t: LABEL[g.s] + " " + fmtNum(g.names.length) }; });
 
     if (fmt === "svg") {
       var sp = d3.geoPath(projection), font = "system-ui, -apple-system, sans-serif";
@@ -180,7 +185,7 @@
         o.push('<circle cx="' + (x + 6) + '" cy="' + (y - 5) + '" r="6" fill="' + col[it.s] + '"/><text x="' + (x + 20) + '" y="' + y + '" font-family="' + font + '" font-size="16" fill="' + v("--text") + '">' + it.t + '</text>');
         x += 130;
       });
-      o.push('<text x="' + W / 2 + '" y="' + (TH - 22) + '" text-anchor="middle" font-family="' + font + '" font-size="14" fill="' + v("--muted") + '">' + SITE + '</text>');
+      o.push('<text x="' + W / 2 + '" y="' + (TH - 22) + '" text-anchor="middle" font-family="' + font + '" font-size="14" fill="' + v("--muted") + '">' + esc(SITE + " · " + fmtDate(new Date())) + '</text>');
       o.push('</svg>');
       saveBlob(new Blob([o.join("\n")], { type: "image/svg+xml" }), "my-maps.svg");
       return;
@@ -207,7 +212,7 @@
       ctx.fillStyle = col[it.s]; ctx.beginPath(); ctx.arc(cx + 6, cy - 5, 6, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = v("--text"); ctx.fillText(it.t, cx + 20, cy); cx += widths[i] + gap;
     });
-    ctx.textAlign = "center"; ctx.fillStyle = v("--muted"); ctx.font = "14px system-ui, -apple-system, sans-serif"; ctx.fillText(SITE, W / 2, TH - 22);
+    ctx.textAlign = "center"; ctx.fillStyle = v("--muted"); ctx.font = "14px system-ui, -apple-system, sans-serif"; ctx.fillText(SITE + " · " + fmtDate(new Date()), W / 2, TH - 22);
     if (fmt === "gif") { makeGif(canvas, padTop); return; }
     var jpg = fmt === "jpg";
     canvas.toBlob(function (b) { if (onBlob) onBlob(b); else saveBlob(b, "my-maps." + fmt); }, jpg ? "image/jpeg" : "image/png", jpg ? 0.92 : undefined);
@@ -243,7 +248,7 @@
       function work() {
         var until = performance.now() + 40;
         while (i < total && performance.now() < until) { addFrame(); i++; }
-        if (i < total) { gifToast("Making your animated GIF… " + Math.round(i / total * 100) + "%"); setTimeout(work, 0); return; }
+        if (i < total) { gifToast("Making your animated GIF… " + (window.Intl ? new Intl.NumberFormat(undefined, { style: "percent" }).format(i / total) : Math.round(i / total * 100) + "%")); setTimeout(work, 0); return; }
         // Hold the last frame (plain map) so the loop pauses before it starts again.
         if (dec) { ctx.drawImage(base, 0, 0); var rgba = ctx.getImageData(0, 0, fw, fh).data, pal = g.quantize(rgba, 256, { format: "rgb444" }); enc.writeFrame(g.applyPalette(rgba, pal, "rgb444"), fw, fh, { palette: pal, delay: 1500 }); }
         enc.finish();
@@ -279,7 +284,7 @@
   var siteUrl = "https://mymaps.alltripsconsidered.com/";
   function shareText() {
     var n = Object.keys(data).filter(function (k) { return (data[k] === "visited" || data[k] === "lived" || data[k] === "living") && byId[k]; }).length;
-    return n ? "I've been to " + n + (n === 1 ? " country" : " countries") + "! Map your travels on My Maps." : "Map the countries you've visited on My Maps.";
+    return n ? "I've been to " + fmtNum(n) + (n === 1 ? " country" : " countries") + "! Map your travels on My Maps." : "Map the countries you've visited on My Maps.";
   }
   function toast(text) {
     var t = document.getElementById("app-toast"); if (!t) return;

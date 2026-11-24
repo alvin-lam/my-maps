@@ -227,7 +227,8 @@
       styleBtns.forEach(function (b) { b.setAttribute("aria-checked", String(b.dataset.mapstyle === mapStyle)); });
       decorBtns.forEach(function (b) { b.setAttribute("aria-checked", String(b.dataset.decor === (reduceMotion ? "off" : decor))); });
       cards.forEach(function (c) { c.setAttribute("aria-checked", String(c.dataset.scheme === scheme)); });
-      autoSub.textContent = "Today: " + byId[forDate(new Date())].label + ". Changes with the seasons and holidays.";
+      var today = new Date(), dayText = today.toLocaleDateString(undefined, { month: "long", day: "numeric" });
+      autoSub.textContent = dayText + ": " + byId[forDate(today)].label + ". Changes with the seasons and holidays.";
       if (emoji) emoji.textContent = byId[r].emoji;
       var label = "Appearance: " + (scheme === "auto" ? "Automatic (" + byId[r].label + ")" : byId[r].label) + ", " + (mode === "system" ? "system mode" : mode + " mode");
       btn.setAttribute("aria-label", label); btn.setAttribute("title", label);
