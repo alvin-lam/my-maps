@@ -297,6 +297,36 @@ body.has-install-banner { padding-bottom: var(--install-banner-height, 140px); }
   :root[data-scheme="halloween"]:not([data-theme="light"]) { --primary: #e69863; --bg: #141018; --surface: #201c24; --sea: #1c1624; --visited: #f29243; --planning: #9262be; --lived: #62af5d; --living: #cd5454; }
   :root[data-scheme="christmas"]:not([data-theme="light"]) { --primary: #ce6e75; --bg: #141a16; --surface: #202522; --sea: #141f1a; --visited: #479261; --planning: #dcb141; --lived: #dd5860; --living: #7996b6; }
 }
+/* More holidays */
+:root[data-scheme="valentines-day"] { --primary: #c2185b; --bg: #fdf6f8; --sea: #fbe9ef; --visited: #d81b60; --planning: #f4a3b8; --lived: #8e1b3a; --living: #9c7bd1; }
+:root[data-scheme="st-patricks-day"] { --primary: #1b7a3a; --bg: #f5faf4; --sea: #e4f2e6; --visited: #2e9e4f; --planning: #d4a017; --lived: #0f5a2c; --living: #e07b24; }
+:root[data-scheme="holi"] { --primary: #c026d3; --bg: #fdf7fb; --sea: #f2eefb; --visited: #ec4899; --planning: #facc15; --lived: #22c55e; --living: #3b82f6; }
+:root[data-scheme="earth-day"] { --primary: #2a7a4b; --bg: #f4f8f3; --sea: #dcecf7; --visited: #3f9e4f; --planning: #1f6fb8; --lived: #c69a4a; --living: #8a5a3c; }
+:root[data-scheme="dia-de-los-muertos"] { --primary: #c2185b; --bg: #fbf6f0; --sea: #efe9f3; --visited: #f59e0b; --planning: #d81b60; --lived: #14b8a6; --living: #7c3aed; }
+:root[data-scheme="diwali"] { --primary: #c2410c; --bg: #fdf7ef; --sea: #f8ece0; --visited: #f59e0b; --planning: #ea580c; --lived: #be185d; --living: #6d28d9; }
+:root[data-scheme="thanksgiving"] { --primary: #a0521d; --bg: #faf5ee; --sea: #efebe4; --visited: #d9661f; --planning: #9f1239; --lived: #d4a72c; --living: #6b4423; }
+:root[data-scheme="hanukkah"] { --primary: #1d4ed8; --bg: #f6f8fc; --sea: #e3ebf8; --visited: #2563eb; --planning: #7c8aa5; --lived: #0e2a6b; --living: #38bdf8; }
+:root[data-scheme="new-years-eve"] { --primary: #8a6d1a; --bg: #f7f6f2; --sea: #e6e9f2; --visited: #c9a227; --planning: #1f2a5c; --lived: #6f7d96; --living: #7b3fa0; }
+:root[data-scheme="valentines-day"][data-theme="dark"] { --primary: #d76994; --bg: #1a1015; --surface: #251c21; --sea: #26141d; --visited: #df447d; --planning: #f6b4c5; --lived: #a2445d; --living: #ae93d9; }
+:root[data-scheme="st-patricks-day"][data-theme="dark"] { --primary: #6ba97f; --bg: #0f1712; --surface: #1b231e; --sea: #13211a; --visited: #54af6f; --planning: #dcb141; --lived: #3a7852; --living: #e6934b; }
+:root[data-scheme="holi"][data-theme="dark"] { --primary: #d672e2; --bg: #160f19; --surface: #221b24; --sea: #1c1530; --visited: #ef69ab; --planning: #fbd53f; --lived: #4acf7b; --living: #5e98f8; }
+:root[data-scheme="earth-day"][data-theme="dark"] { --primary: #75a98a; --bg: #0f1714; --surface: #1b2320; --sea: #11202a; --visited: #62af6f; --planning: #4789c5; --lived: #d0ac6b; --living: #9f785f; }
+:root[data-scheme="dia-de-los-muertos"][data-theme="dark"] { --primary: #d76994; --bg: #150f15; --surface: #211b21; --sea: #1d1424; --visited: #f7af37; --planning: #df447d; --lived: #3ec5b6; --living: #945df0; }
+:root[data-scheme="diwali"][data-theme="dark"] { --primary: #d78461; --bg: #170f0c; --surface: #231b18; --sea: #22150f; --visited: #f7af37; --planning: #ee7638; --lived: #ca427a; --living: #874fe0; }
+:root[data-scheme="thanksgiving"][data-theme="dark"] { --primary: #c18f6c; --bg: #18120e; --surface: #241e1a; --sea: #1f1813; --visited: #e08247; --planning: #b03d5d; --lived: #dcb752; --living: #86664b; }
+:root[data-scheme="hanukkah"][data-theme="dark"] { --primary: #6c8ce6; --bg: #0e1320; --surface: #1a1f2b; --sea: #122038; --visited: #4c7fef; --planning: #949fb5; --lived: #395086; --living: #5cc9f9; }
+:root[data-scheme="new-years-eve"][data-theme="dark"] { --primary: #b3a06a; --bg: #0b0d14; --surface: #171920; --sea: #121829; --visited: #d3b34e; --planning: #475079; --lived: #8994a9; --living: #9362b1; }
+@media (prefers-color-scheme: dark) {
+  :root[data-scheme="valentines-day"]:not([data-theme="light"]) { --primary: #d76994; --bg: #1a1015; --surface: #251c21; --sea: #26141d; --visited: #df447d; --planning: #f6b4c5; --lived: #a2445d; --living: #ae93d9; }
+  :root[data-scheme="st-patricks-day"]:not([data-theme="light"]) { --primary: #6ba97f; --bg: #0f1712; --surface: #1b231e; --sea: #13211a; --visited: #54af6f; --planning: #dcb141; --lived: #3a7852; --living: #e6934b; }
+  :root[data-scheme="holi"]:not([data-theme="light"]) { --primary: #d672e2; --bg: #160f19; --surface: #221b24; --sea: #1c1530; --visited: #ef69ab; --planning: #fbd53f; --lived: #4acf7b; --living: #5e98f8; }
+  :root[data-scheme="earth-day"]:not([data-theme="light"]) { --primary: #75a98a; --bg: #0f1714; --surface: #1b2320; --sea: #11202a; --visited: #62af6f; --planning: #4789c5; --lived: #d0ac6b; --living: #9f785f; }
+  :root[data-scheme="dia-de-los-muertos"]:not([data-theme="light"]) { --primary: #d76994; --bg: #150f15; --surface: #211b21; --sea: #1d1424; --visited: #f7af37; --planning: #df447d; --lived: #3ec5b6; --living: #945df0; }
+  :root[data-scheme="diwali"]:not([data-theme="light"]) { --primary: #d78461; --bg: #170f0c; --surface: #231b18; --sea: #22150f; --visited: #f7af37; --planning: #ee7638; --lived: #ca427a; --living: #874fe0; }
+  :root[data-scheme="thanksgiving"]:not([data-theme="light"]) { --primary: #c18f6c; --bg: #18120e; --surface: #241e1a; --sea: #1f1813; --visited: #e08247; --planning: #b03d5d; --lived: #dcb752; --living: #86664b; }
+  :root[data-scheme="hanukkah"]:not([data-theme="light"]) { --primary: #6c8ce6; --bg: #0e1320; --surface: #1a1f2b; --sea: #122038; --visited: #4c7fef; --planning: #949fb5; --lived: #395086; --living: #5cc9f9; }
+  :root[data-scheme="new-years-eve"]:not([data-theme="light"]) { --primary: #b3a06a; --bg: #0b0d14; --surface: #171920; --sea: #121829; --visited: #d3b34e; --planning: #475079; --lived: #8994a9; --living: #9362b1; }
+}
 .page-header::after { content: ""; display: block; width: calc(100% - 42px); height: 4px; margin: 14px auto 20px; border-radius: 4px; background: linear-gradient(90deg, var(--visited), var(--planning), var(--lived), var(--living)); opacity: 0; transition: opacity .2s; }
 :root[data-scheme] .page-header::after { opacity: 1; }
 :root[data-scheme="pride"] .page-header::after { background: linear-gradient(90deg, #e40303, #ff8c00, #ffed00, #008026, #24408e, #732982); }

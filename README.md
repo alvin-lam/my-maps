@@ -11,7 +11,7 @@ Live site: [mymaps.alltripsconsidered.com](https://mymaps.alltripsconsidered.com
 - **Zoom and pan:** Use the buttons, a mouse wheel or touch gestures.
 - **Counts and lists:** See totals for each status and a full list under "My countries".
 - **Exports:** Download your list as CSV, JSON or plain text. Download the map as PNG, JPG or SVG.
-- **Appearance:** One button opens a panel for System, Light or Dark mode and the color scheme. "Automatic" is the default and follows the seasons and holidays (Lunar New Year, Pride, Independence Day, Halloween and Christmas). Classic and each season or holiday can also be picked by hand.
+- **Appearance:** One button opens a panel for System, Light or Dark mode and the color scheme. "Automatic" is the default and follows the seasons and holidays (New Year's Eve, Lunar New Year, Valentine's Day, St. Patrick's Day, Earth Day, Pride, Independence Day, Halloween, Diwali, Thanksgiving and Christmas). Holi, Día de los Muertos and Hanukkah can be picked by hand. Classic and each season or holiday can also be picked by hand.
 - **Installable app:** Install My Maps on phones, tablets and computers. It opens like an app and works offline.
 
 ## Disputed areas

@@ -7,18 +7,33 @@
   var THEME_KEY = "world-map-theme", SCHEME_KEY = "my-maps-scheme", ACK_KEY = "my-maps-holiday-seen";
   var root = document.documentElement;
   var media = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
-  var SCHEMES = [{"id": "classic", "label": "Classic", "emoji": "🌍", "group": "Classic", "colors": ["#2f9e6e", "#e0a320", "#7b4fd6", "#d9534f"]}, {"id": "daylight", "label": "Daylight", "emoji": "🌤️", "group": "Classic", "colors": ["#0a9d58", "#f4a100", "#6c3fd1", "#e2334f"]}, {"id": "midnight", "label": "Midnight", "emoji": "🌙", "group": "Classic", "colors": ["#2ee6a6", "#ffc94d", "#b18cff", "#ff6b8b"], "dark": true}, {"id": "spring", "label": "Spring", "emoji": "🌸", "group": "Seasons", "colors": ["#3f9e5f", "#e9a23b", "#9b6cc4", "#e5738f"]}, {"id": "summer", "label": "Summer", "emoji": "☀️", "group": "Seasons", "colors": ["#12a4a0", "#f6b416", "#f0743e", "#c2306b"]}, {"id": "autumn", "label": "Autumn", "emoji": "🍂", "group": "Seasons", "colors": ["#c8681d", "#d9a21b", "#7d2f3a", "#4f6d8f"]}, {"id": "winter", "label": "Winter", "emoji": "❄️", "group": "Seasons", "colors": ["#2f7fc4", "#c9a227", "#5b4fb0", "#1a9e8f"]}, {"id": "lunar-new-year", "label": "Lunar New Year", "emoji": "🧧", "group": "Holidays", "colors": ["#d6262f", "#e0a11b", "#1f8a70", "#7b3fa0"]}, {"id": "pride", "label": "Pride", "emoji": "🏳️‍🌈", "group": "Holidays", "colors": ["#e53935", "#fb8c00", "#43a047", "#1e88e5"]}, {"id": "independence-day", "label": "Independence Day", "emoji": "🎆", "group": "Holidays", "colors": ["#b22234", "#c9a227", "#2a2f6e", "#4f9fe0"]}, {"id": "halloween", "label": "Halloween", "emoji": "🎃", "group": "Holidays", "colors": ["#ef7a1a", "#7a3fb0", "#3f9e3a", "#c22f2f"]}, {"id": "christmas", "label": "Christmas", "emoji": "🎄", "group": "Holidays", "colors": ["#1f7a3e", "#d4a017", "#d6333d", "#5b7fa6"]}];
+  var SCHEMES = [{"id": "classic", "label": "Classic", "emoji": "🌍", "group": "Classic", "colors": ["#2f9e6e", "#e0a320", "#7b4fd6", "#d9534f"]}, {"id": "daylight", "label": "Daylight", "emoji": "🌤️", "group": "Classic", "colors": ["#0a9d58", "#f4a100", "#6c3fd1", "#e2334f"]}, {"id": "midnight", "label": "Midnight", "emoji": "🌙", "group": "Classic", "colors": ["#2ee6a6", "#ffc94d", "#b18cff", "#ff6b8b"], "dark": true}, {"id": "spring", "label": "Spring", "emoji": "🌸", "group": "Seasons", "colors": ["#3f9e5f", "#e9a23b", "#9b6cc4", "#e5738f"]}, {"id": "summer", "label": "Summer", "emoji": "☀️", "group": "Seasons", "colors": ["#12a4a0", "#f6b416", "#f0743e", "#c2306b"]}, {"id": "autumn", "label": "Autumn", "emoji": "🍂", "group": "Seasons", "colors": ["#c8681d", "#d9a21b", "#7d2f3a", "#4f6d8f"]}, {"id": "winter", "label": "Winter", "emoji": "❄️", "group": "Seasons", "colors": ["#2f7fc4", "#c9a227", "#5b4fb0", "#1a9e8f"]}, {"id": "lunar-new-year", "label": "Lunar New Year", "emoji": "🧧", "group": "Holidays", "colors": ["#d6262f", "#e0a11b", "#1f8a70", "#7b3fa0"]}, {"id": "valentines-day", "label": "Valentine's Day", "emoji": "💝", "group": "Holidays", "colors": ["#d81b60", "#f4a3b8", "#8e1b3a", "#9c7bd1"]}, {"id": "st-patricks-day", "label": "St. Patrick's Day", "emoji": "☘️", "group": "Holidays", "colors": ["#2e9e4f", "#d4a017", "#0f5a2c", "#e07b24"]}, {"id": "holi", "label": "Holi", "emoji": "🎨", "group": "Holidays", "colors": ["#ec4899", "#facc15", "#22c55e", "#3b82f6"]}, {"id": "earth-day", "label": "Earth Day", "emoji": "🌎", "group": "Holidays", "colors": ["#3f9e4f", "#1f6fb8", "#c69a4a", "#8a5a3c"]}, {"id": "pride", "label": "Pride", "emoji": "🏳️‍🌈", "group": "Holidays", "colors": ["#e53935", "#fb8c00", "#43a047", "#1e88e5"]}, {"id": "independence-day", "label": "Independence Day", "emoji": "🎆", "group": "Holidays", "colors": ["#b22234", "#c9a227", "#2a2f6e", "#4f9fe0"]}, {"id": "halloween", "label": "Halloween", "emoji": "🎃", "group": "Holidays", "colors": ["#ef7a1a", "#7a3fb0", "#3f9e3a", "#c22f2f"]}, {"id": "dia-de-los-muertos", "label": "Día de los Muertos", "emoji": "💀", "group": "Holidays", "colors": ["#f59e0b", "#d81b60", "#14b8a6", "#7c3aed"]}, {"id": "diwali", "label": "Diwali", "emoji": "🪔", "group": "Holidays", "colors": ["#f59e0b", "#ea580c", "#be185d", "#6d28d9"]}, {"id": "thanksgiving", "label": "Thanksgiving", "emoji": "🦃", "group": "Holidays", "colors": ["#d9661f", "#9f1239", "#d4a72c", "#6b4423"]}, {"id": "hanukkah", "label": "Hanukkah", "emoji": "🕎", "group": "Holidays", "colors": ["#2563eb", "#7c8aa5", "#0e2a6b", "#38bdf8"]}, {"id": "christmas", "label": "Christmas", "emoji": "🎄", "group": "Holidays", "colors": ["#1f7a3e", "#d4a017", "#d6333d", "#5b7fa6"]}, {"id": "new-years-eve", "label": "New Year's Eve", "emoji": "🥂", "group": "Holidays", "colors": ["#c9a227", "#1f2a5c", "#6f7d96", "#7b3fa0"]}];
   var byId = {}; SCHEMES.forEach(function (s) { byId[s.id] = s; });
-  var HOLIDAYS = { "lunar-new-year": 1, pride: 1, "independence-day": 1, halloween: 1, christmas: 1 };
+  var HOLIDAYS = { "lunar-new-year": 1, "valentines-day": 1, "st-patricks-day": 1, "earth-day": 1, pride: 1, "independence-day": 1, halloween: 1, diwali: 1, thanksgiving: 1, christmas: 1, "new-years-eve": 1 };
+  // Main day of Diwali (Lakshmi Puja) each year: [month index, day]. Holi, Día de los Muertos and Hanukkah are picked by hand only.
+  var DIWALI = { 2025: [9, 20], 2026: [10, 8], 2027: [9, 29], 2028: [9, 17], 2029: [10, 5], 2030: [9, 26], 2031: [10, 14], 2032: [10, 2], 2033: [9, 22], 2034: [10, 10], 2035: [9, 30] };
   // Lunar New Year moves each year: [month index, day].
   var LUNAR = { 2025: [0, 29], 2026: [1, 17], 2027: [1, 6], 2028: [0, 26], 2029: [1, 13], 2030: [1, 3], 2031: [0, 23], 2032: [1, 11], 2033: [0, 31], 2034: [1, 19], 2035: [1, 8] };
 
   function get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function set(k, v) { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
 
+  function near(d, y, md, before, after) {
+    if (!md) return false;
+    var diff = Math.round((d - new Date(y, md[0], md[1])) / 864e5);
+    return diff >= -before && diff <= after;
+  }
+  function thanksgiving(y) { var first = new Date(y, 10, 1).getDay(); return [10, 1 + ((4 - first + 7) % 7) + 21]; }
   function forDate(d) {
-    var y = d.getFullYear(), m = d.getMonth(), day = d.getDate(), ln = LUNAR[y];
-    if (ln) { var diff = (d - new Date(y, ln[0], ln[1])) / 864e5; if (diff >= -7 && diff <= 15) return "lunar-new-year"; }
+    d = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    var y = d.getFullYear(), m = d.getMonth(), day = d.getDate();
+    if ((m === 11 && day >= 27) || (m === 0 && day <= 2)) return "new-years-eve";
+    if (near(d, y, LUNAR[y], 7, 15)) return "lunar-new-year";
+    if (near(d, y, DIWALI[y], 2, 2)) return "diwali";
+    if (near(d, y, thanksgiving(y), 3, 3)) return "thanksgiving";
+    if (m === 1 && day >= 7 && day <= 14) return "valentines-day";
+    if (m === 2 && day >= 10 && day <= 17) return "st-patricks-day";
+    if (m === 3 && day >= 15 && day <= 22) return "earth-day";
     if (m === 11 && day <= 26) return "christmas";
     if (m === 9 && day >= 15) return "halloween";
     if ((m === 5 && day >= 28) || (m === 6 && day <= 5)) return "independence-day";
@@ -71,7 +86,7 @@
     var backdrop = document.getElementById("appearance-backdrop");
     if (!btn || !panel) return;
     // Sea color for previews, read from the stylesheet rules for each scheme.
-    SCHEMES.forEach(function (s) { s.seaColor = { classic: "#eaf1fb", daylight: "#e8f2fc", midnight: "#0f1a33", spring: "#e6f3f7", summer: "#dff3f8", autumn: "#eef0ee", winter: "#e3edf8", "lunar-new-year": "#f7ece4", pride: "#eef0fb", "independence-day": "#e5ecf8", halloween: "#ece7f1", christmas: "#eaf1ee" }[s.id]; });
+    SCHEMES.forEach(function (s) { s.seaColor = { classic: "#eaf1fb", daylight: "#e8f2fc", midnight: "#0f1a33", spring: "#e6f3f7", summer: "#dff3f8", autumn: "#eef0ee", winter: "#e3edf8", "lunar-new-year": "#f7ece4", pride: "#eef0fb", "independence-day": "#e5ecf8", halloween: "#ece7f1", christmas: "#eaf1ee", "valentines-day": "#fbe9ef", "st-patricks-day": "#e4f2e6", "holi": "#f2eefb", "earth-day": "#dcecf7", "dia-de-los-muertos": "#efe9f3", "diwali": "#f8ece0", "thanksgiving": "#efebe4", "hanukkah": "#e3ebf8", "new-years-eve": "#e6e9f2" }[s.id]; });
 
     var modeBtns = Array.prototype.slice.call(panel.querySelectorAll(".mode-switch button"));
     modeBtns.forEach(function (b) {
