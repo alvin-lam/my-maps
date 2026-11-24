@@ -330,7 +330,7 @@
   setupMenu("export-list", "export-menu", exportList);
   setupMenu("download-image", "image-menu", function (fmt) { downloadImage(fmt); });
 
-  // Share: links to each network, sorted A to Z. "More options" uses the device share sheet and attaches the map image.
+  // Share: links to each network, sorted A to Z, with Copy link last.
   var siteUrl = "https://mymaps.alltripsconsidered.com/";
   function shareText() {
     var n = Object.keys(data).filter(function (k) { return (data[k] === "visited" || data[k] === "lived" || data[k] === "living") && byId[k]; }).length;
@@ -341,8 +341,6 @@
     t.innerHTML = ""; var s = document.createElement("span"); s.textContent = text; t.appendChild(s); t.hidden = false;
     clearTimeout(toast.timer); toast.timer = setTimeout(function () { t.hidden = true; }, 3000);
   }
-  var nativeBtn = document.getElementById("share-native");
-  if (!navigator.share) nativeBtn.remove();
   function share(target) {
     var text = shareText(), u = encodeURIComponent(siteUrl), tx = encodeURIComponent(text), both = encodeURIComponent(text + " " + siteUrl);
     var links = {
@@ -359,13 +357,6 @@
       var done = function () { toast("Link copied."); };
       if (navigator.clipboard) navigator.clipboard.writeText(siteUrl).then(done, function () { toast(siteUrl); });
       else toast(siteUrl);
-    } else if (target === "native") {
-      downloadImage("png", function (blob) {
-        var file = new File([blob], "my-maps.png", { type: "image/png" });
-        var payload = { title: "My Maps", text: text, url: siteUrl };
-        if (navigator.canShare && navigator.canShare({ files: [file] })) payload.files = [file];
-        navigator.share(payload).catch(function () {});
-      });
     } else if (links[target]) {
       window.open(links[target], "_blank", "noopener,width=640,height=640");
     }
