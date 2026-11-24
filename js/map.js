@@ -352,7 +352,6 @@
       linkedin: "https://www.linkedin.com/sharing/share-offsite/?url=" + u,
       pinterest: "https://pinterest.com/pin/create/button/?url=" + u + "&description=" + tx,
       reddit: "https://www.reddit.com/submit?url=" + u + "&title=" + tx,
-      telegram: "https://t.me/share/url?url=" + u + "&text=" + tx,
       threads: "https://www.threads.net/intent/post?text=" + both,
       whatsapp: "https://wa.me/?text=" + both,
       x: "https://x.com/intent/post?text=" + tx + "&url=" + u
