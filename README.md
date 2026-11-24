@@ -63,7 +63,14 @@ my-maps/
 │   ├── install.js        Install banner, offline and update messages
 │   └── back-to-top.js    Back to top button
 ├── data/
-│   └── disputed.js       Disputed and occupied area outlines
+│   ├── world.json        Map shapes, built by scripts/build-map.mjs
+│   └── places.json       Names, codes, flags and notes for each place
+├── scripts/
+│   ├── build-map.mjs     Builds the two data files
+│   ├── rules.mjs         Territory splits, tiny places and full names
+│   ├── source/
+│   │   └── disputed.json Disputed and occupied area outlines
+│   └── package.json      Build tools
 ├── assets/
 │   ├── icon.png          Site icon
 │   ├── icon-192.png      App icon, small
@@ -90,14 +97,34 @@ Then open http://localhost:8000 in your browser.
 
 ## Dependencies
 
-These load from the jsDelivr CDN, so there is no build step:
+The site loads these from the jsDelivr CDN:
 
 - [D3](https://d3js.org) 7.9.0 for the map projection and zoom
-- [TopoJSON Client](https://github.com/topojson/topojson-client) 3.1.0 for the map shapes
-- [World Atlas](https://github.com/topojson/world-atlas) 2.0.2 for the country borders
+- [TopoJSON Client](https://github.com/topojson/topojson-client) 3.1.0 for reading the map shapes
 - [gifenc](https://github.com/mattdesl/gifenc) 1.0.3 for GIF downloads, loaded only when a GIF is requested
 
-Disputed area outlines come from [Natural Earth](https://www.naturalearthdata.com), which is in the public domain.
+The map data is served from the site itself. Country borders come from [World Atlas](https://github.com/topojson/world-atlas) 2.0.2, and disputed area outlines come from [Natural Earth](https://www.naturalearthdata.com). Both are in the public domain.
+
+## Map data
+
+The browser loads two ready-made files instead of fixing up raw map data on every visit:
+
+- `data/world.json` holds the shapes. Territories are split from their home country, tiny places are added as small circles, and disputed areas are cut out of the countries around them. Borders are simplified to about the detail the map can show, and small places keep every point so they never disappear.
+- `data/places.json` holds each place's name, two- and three-letter codes, flag and note.
+
+Each place keeps the same key the site has always saved, such as `840` for the United States or `x-Crimea`, so visitors' maps carry over unchanged.
+
+To change a place, edit `scripts/rules.mjs` or `scripts/source/disputed.json`, then rebuild from the `scripts` folder:
+
+```bash
+npm install
+```
+
+```bash
+npm run build
+```
+
+Set `KEEP` to change how much border detail is kept, for example `KEEP=0.5 npm run build`. The default is `0.35`.
 
 ## Making changes
 
