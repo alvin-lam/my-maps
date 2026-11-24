@@ -297,7 +297,7 @@ body.has-install-banner { padding-bottom: var(--install-banner-height, 140px); }
   :root[data-scheme="halloween"]:not([data-theme="light"]) { --primary: #e69863; --bg: #141018; --surface: #201c24; --sea: #1c1624; --visited: #f29243; --planning: #9262be; --lived: #62af5d; --living: #cd5454; }
   :root[data-scheme="christmas"]:not([data-theme="light"]) { --primary: #ce6e75; --bg: #141a16; --surface: #202522; --sea: #141f1a; --visited: #479261; --planning: #dcb141; --lived: #dd5860; --living: #7996b6; }
 }
-.page-header::after { content: ""; display: block; width: calc(100% - 42px); height: 4px; margin: 14px auto 0; border-radius: 4px; background: linear-gradient(90deg, var(--visited), var(--planning), var(--lived), var(--living)); opacity: 0; transition: opacity .2s; }
+.page-header::after { content: ""; display: block; width: calc(100% - 42px); height: 4px; margin: 14px auto 20px; border-radius: 4px; background: linear-gradient(90deg, var(--visited), var(--planning), var(--lived), var(--living)); opacity: 0; transition: opacity .2s; }
 :root[data-scheme] .page-header::after { opacity: 1; }
 :root[data-scheme="pride"] .page-header::after { background: linear-gradient(90deg, #e40303, #ff8c00, #ffed00, #008026, #24408e, #732982); }
 @media (max-width: 600px) { .page-header::after { width: calc(100% - 34px); } }
