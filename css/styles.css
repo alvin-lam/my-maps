@@ -287,9 +287,9 @@ body.has-install-banner { padding-bottom: var(--install-banner-height, 140px); }
   :root[data-scheme="independence-day"]:not([data-theme="light"]) { --primary: #6b82b9; --bg: #10131d; --surface: #1c1f28; --sea: #141b2c; --visited: #c04a59; --planning: #d3b34e; --lived: #5f5e88; --living: #5090d3; }
   :root[data-scheme="halloween"]:not([data-theme="light"]) { --primary: #e69863; --bg: #141018; --surface: #201c24; --sea: #1c1624; --visited: #f29243; --planning: #9262be; --lived: #62af5d; --living: #cd5454; }
 }
-.page-header::after { content: ""; display: block; width: 140px; height: 4px; margin: 14px auto 0; border-radius: 4px; background: linear-gradient(90deg, var(--visited), var(--planning), var(--lived), var(--living)); opacity: 0; transition: opacity .2s; }
+.page-header::after { content: ""; display: block; width: calc(100% - 42px); height: 4px; margin: 14px auto 0; border-radius: 4px; background: linear-gradient(90deg, var(--visited), var(--planning), var(--lived), var(--living)); opacity: 0; transition: opacity .2s; }
 :root[data-scheme] .page-header::after { opacity: 1; }
-:root[data-scheme="pride"] .page-header::after { width: 180px; background: linear-gradient(90deg, #e40303, #ff8c00, #ffed00, #008026, #24408e, #732982); }
+:root[data-scheme="pride"] .page-header::after { background: linear-gradient(90deg, #e40303, #ff8c00, #ffed00, #008026, #24408e, #732982); }
 
 /* Palette button and menu, next to the light and dark button */
 .scheme-wrap { position: absolute; top: 16px; right: calc(max(16px, env(safe-area-inset-right, 0px)) + 48px); z-index: 15; }
@@ -304,3 +304,4 @@ body.has-install-banner { padding-bottom: var(--install-banner-height, 140px); }
 .scheme-menu .swatch { display: inline-flex; gap: 2px; }
 .scheme-menu .swatch i { width: 10px; height: 10px; border-radius: 50%; }
 @media (max-width: 680px) { .scheme-wrap { top: 14px; } }
+@media (max-width: 600px) { .page-header::after { width: calc(100% - 34px); } }
