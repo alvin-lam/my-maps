@@ -11,8 +11,7 @@ Live site: [mymaps.alltripsconsidered.com](https://mymaps.alltripsconsidered.com
 - **Zoom and pan:** Use the buttons, a mouse wheel or touch gestures.
 - **Counts and lists:** See totals for each status and a full list under "My countries".
 - **Exports:** Download your list as CSV, JSON or plain text. Download the map as PNG, JPG or SVG.
-- **Light and dark themes:** The page follows your device setting, or you can choose one.
-- **Color schemes:** The palette button offers Classic, the four seasons, Lunar New Year, Pride, Independence Day, Halloween and Christmas. "Match the calendar" switches on its own through the year.
+- **Appearance:** One button opens a panel for System, Light or Dark mode and the color scheme. "Automatic" is the default and follows the seasons and holidays (Lunar New Year, Pride, Independence Day, Halloween and Christmas). Classic and each season or holiday can also be picked by hand.
 - **Installable app:** Install My Maps on phones, tablets and computers. It opens like an app and works offline.
 
 ## Disputed areas
@@ -34,6 +33,7 @@ world-map/
 │   └── styles.css      All page styles and color tokens
 ├── js/
 │   ├── map.js          Map, statuses, search and exports
+│   ├── appearance.js   Mode and color scheme panel
 │   ├── install.js      Install banner, offline and update messages
 │   └── back-to-top.js  Back to top button
 ├── data/
