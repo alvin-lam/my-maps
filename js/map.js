@@ -213,7 +213,7 @@
   }
 
   function esc(t) { return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
-  function downloadImage(fmt) {
+  function downloadImage(fmt, onBlob) {
     if (!pathsSel) return;
     var cs = getComputedStyle(document.documentElement);
     function v(n) { return cs.getPropertyValue(n).trim(); }
@@ -265,7 +265,7 @@
     });
     if (fmt === "gif") { makeGif(canvas, padTop); return; }
     var jpg = fmt === "jpg";
-    canvas.toBlob(function (b) { saveBlob(b, "my-maps." + fmt); }, jpg ? "image/jpeg" : "image/png", jpg ? 0.92 : undefined);
+    canvas.toBlob(function (b) { if (onBlob) onBlob(b); else saveBlob(b, "my-maps." + fmt); }, jpg ? "image/jpeg" : "image/png", jpg ? 0.92 : undefined);
   }
 
   // Animated GIF: the map image with the current holiday decoration playing over the map area.
@@ -328,7 +328,53 @@
     });
   }
   setupMenu("export-list", "export-menu", exportList);
-  setupMenu("download-image", "image-menu", downloadImage);
+  setupMenu("download-image", "image-menu", function (fmt) { downloadImage(fmt); });
+
+  // Share: links to each network, sorted A to Z. "More options" uses the device share sheet and attaches the map image.
+  var siteUrl = "https://mymaps.alltripsconsidered.com/";
+  function shareText() {
+    var n = Object.keys(data).filter(function (k) { return (data[k] === "visited" || data[k] === "lived" || data[k] === "living") && byId[k]; }).length;
+    return n ? "I've been to " + n + (n === 1 ? " country" : " countries") + "! Map your travels on My Maps." : "Map the countries you've visited on My Maps.";
+  }
+  function toast(text) {
+    var t = document.getElementById("app-toast"); if (!t) return;
+    t.innerHTML = ""; var s = document.createElement("span"); s.textContent = text; t.appendChild(s); t.hidden = false;
+    clearTimeout(toast.timer); toast.timer = setTimeout(function () { t.hidden = true; }, 3000);
+  }
+  var nativeBtn = document.getElementById("share-native");
+  if (!navigator.share) nativeBtn.remove();
+  function share(target) {
+    var text = shareText(), u = encodeURIComponent(siteUrl), tx = encodeURIComponent(text), both = encodeURIComponent(text + " " + siteUrl);
+    var links = {
+      bluesky: "https://bsky.app/intent/compose?text=" + both,
+      email: "mailto:?subject=" + encodeURIComponent("My Maps") + "&body=" + both,
+      facebook: "https://www.facebook.com/sharer/sharer.php?u=" + u,
+      linkedin: "https://www.linkedin.com/sharing/share-offsite/?url=" + u,
+      pinterest: "https://pinterest.com/pin/create/button/?url=" + u + "&description=" + tx,
+      reddit: "https://www.reddit.com/submit?url=" + u + "&title=" + tx,
+      telegram: "https://t.me/share/url?url=" + u + "&text=" + tx,
+      threads: "https://www.threads.net/intent/post?text=" + both,
+      whatsapp: "https://wa.me/?text=" + both,
+      x: "https://x.com/intent/post?text=" + tx + "&url=" + u
+    };
+    if (target === "copy") {
+      var done = function () { toast("Link copied."); };
+      if (navigator.clipboard) navigator.clipboard.writeText(siteUrl).then(done, function () { toast(siteUrl); });
+      else toast(siteUrl);
+    } else if (target === "native") {
+      downloadImage("png", function (blob) {
+        var file = new File([blob], "my-maps.png", { type: "image/png" });
+        var payload = { title: "My Maps", text: text, url: siteUrl };
+        if (navigator.canShare && navigator.canShare({ files: [file] })) payload.files = [file];
+        navigator.share(payload).catch(function () {});
+      });
+    } else if (target === "email") {
+      location.href = links.email;
+    } else if (links[target]) {
+      window.open(links[target], "_blank", "noopener,width=640,height=640");
+    }
+  }
+  setupMenu("share-map", "share-menu", share);
   document.addEventListener("click", function () { menus.forEach(function (m) { m(); }); });
 
   // Search
