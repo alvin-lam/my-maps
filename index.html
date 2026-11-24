@@ -3,11 +3,45 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>My Maps</title>
+<title>My Maps: Track the Countries You Have Visited | All Trips Considered</title>
+<link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png">
 <link rel="icon" type="image/png" href="assets/icon.png?v=3">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="description" content="Mark the countries you have visited, are planning, have lived in and live in now.">
+<meta name="description" content="Free interactive world map to track the countries you have visited, are planning to visit, have lived in and live in now. Color your map, then download or share it.">
+<link rel="canonical" href="https://mymaps.alltripsconsidered.com/">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="author" content="All Trips Considered">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="All Trips Considered">
+<meta property="og:title" content="My Maps: Track the Countries You Have Visited">
+<meta property="og:description" content="Free interactive world map to track the countries you have visited, are planning to visit, have lived in and live in now. Color your map, then download or share it.">
+<meta property="og:url" content="https://mymaps.alltripsconsidered.com/">
+<meta property="og:image" content="https://mymaps.alltripsconsidered.com/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A world map with visited countries colored in green, planned trips in yellow and homes in purple and red.">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="My Maps: Track the Countries You Have Visited">
+<meta name="twitter:description" content="Free interactive world map to track the countries you have visited, are planning to visit, have lived in and live in now. Color your map, then download or share it.">
+<meta name="twitter:image" content="https://mymaps.alltripsconsidered.com/assets/og-image.png">
+<meta name="twitter:image:alt" content="A world map with visited countries colored in.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "My Maps",
+  "url": "https://mymaps.alltripsconsidered.com/",
+  "description": "Free interactive world map to track the countries you have visited, are planning to visit, have lived in and live in now. Color your map, then download or share it.",
+  "applicationCategory": "TravelApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires JavaScript",
+  "image": "https://mymaps.alltripsconsidered.com/assets/og-image.png",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "publisher": { "@type": "Organization", "name": "All Trips Considered", "url": "https://alltripsconsidered.com" }
+}
+</script>
 <meta name="theme-color" content="#f5f6f8" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#12151b" media="(prefers-color-scheme: dark)">
 <meta name="mobile-web-app-capable" content="yes">
@@ -21,6 +55,7 @@
 <script src="js/appearance.js"></script>
 </head>
 <body>
+  <noscript><p style="padding:16px;text-align:center">My Maps needs JavaScript to show the interactive world map. Please turn on JavaScript to mark the countries you have visited.</p></noscript>
   <main class="container">
     <div class="appearance-wrap">
       <button type="button" id="appearance-toggle" class="theme-toggle" aria-haspopup="dialog" aria-expanded="false" aria-controls="appearance-panel" aria-label="Appearance" title="Appearance">

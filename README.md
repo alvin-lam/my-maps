@@ -70,7 +70,10 @@ my-maps/
 │   ├── icon-512.png      App icon, large
 │   ├── icon-maskable-512.png  App icon for Android home screens
 │   ├── apple-touch-icon.png   App icon for iPhone and iPad
+│   ├── og-image.png      Preview image for links shared on social media
 │   └── tabicon.png       Alternate tab icon
+├── robots.txt            Search engine crawl rules
+├── sitemap.xml           Page list for search engines
 ├── CNAME                 Custom domain for GitHub Pages
 └── README.md
 ```
@@ -114,6 +117,10 @@ Each status appears in a few places. To add one, update all of them:
 ### Releasing an update
 
 The service worker caches the site for offline use. After you change any file, raise `VERSION` in `sw.js` so installed copies download the update and offer a Reload button.
+
+## Search engines
+
+The page has a descriptive title and description, a canonical link, Open Graph and X (Twitter) tags with a preview image, and structured data that describes it as a free web app. `robots.txt` allows crawling and points to `sitemap.xml`. Update `lastmod` in the sitemap after a major change.
 
 ## Deployment
 
