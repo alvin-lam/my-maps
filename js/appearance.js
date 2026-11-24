@@ -16,12 +16,12 @@
   var LUNAR = { 2025: [0, 29], 2026: [1, 17], 2027: [1, 6], 2028: [0, 26], 2029: [1, 13], 2030: [1, 3], 2031: [0, 23], 2032: [1, 11], 2033: [0, 31], 2034: [1, 19], 2035: [1, 8] };
 
   function get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
-  // Guess the hemisphere from the time zone until the visitor picks one.
+  // Seasons follow the hemisphere of the device time zone.
   function guessHemi() {
     var tz = ""; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) {}
     return /^(Australia|Antarctica)\/|^Pacific\/(Auckland|Chatham|Fiji|Tongatapu|Apia|Noumea|Efate|Pago_Pago|Rarotonga|Tahiti|Norfolk)|^America\/(Argentina|Santiago|Sao_Paulo|Montevideo|Asuncion|Lima|La_Paz|Punta_Arenas|Campo_Grande|Cuiaba|Porto_Velho|Recife|Bahia|Maceio|Fortaleza|Belem)|^Africa\/(Johannesburg|Maputo|Harare|Lusaka|Windhoek|Gaborone|Maseru|Mbabane|Blantyre|Lubumbashi|Luanda|Dar_es_Salaam|Kigali|Bujumbura)|^Indian\/(Mauritius|Reunion|Antananarivo|Mayotte|Comoro)|^Atlantic\/(Stanley|St_Helena)/.test(tz) ? "south" : "north";
   }
-  var hemi = (function () { var v = null; try { v = localStorage.getItem("my-maps-hemisphere"); } catch (e) {} return v === "north" || v === "south" ? v : guessHemi(); })();
+  var hemi = guessHemi();
   function set(k, v) { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
 
   function near(d, y, md, before, after) {
@@ -186,13 +186,9 @@
 
     var modeBtns = Array.prototype.slice.call(panel.querySelectorAll(".mode-switch button[data-mode]"));
     var styleBtns = Array.prototype.slice.call(panel.querySelectorAll("[data-mapstyle]"));
-    var hemiBtns = Array.prototype.slice.call(panel.querySelectorAll("[data-hemi]"));
     var decorBtns = Array.prototype.slice.call(panel.querySelectorAll("[data-decor]"));
     styleBtns.forEach(function (b) {
       b.addEventListener("click", function () { mapStyle = b.dataset.mapstyle; set("my-maps-map-style", mapStyle === "flat" ? null : mapStyle); applyMapStyle(); sync(); });
-    });
-    hemiBtns.forEach(function (b) {
-      b.addEventListener("click", function () { hemi = b.dataset.hemi; set("my-maps-hemisphere", hemi); applyScheme(); sync(); });
     });
     decorBtns.forEach(function (b) {
       b.addEventListener("click", function () { decor = b.dataset.decor; set("my-maps-decorations", decor === "off" ? "off" : null); sync(); decorate(); });
@@ -229,7 +225,6 @@
       var r = resolved();
       modeBtns.forEach(function (b) { b.setAttribute("aria-checked", String(b.dataset.mode === mode)); });
       styleBtns.forEach(function (b) { b.setAttribute("aria-checked", String(b.dataset.mapstyle === mapStyle)); });
-      hemiBtns.forEach(function (b) { b.setAttribute("aria-checked", String(b.dataset.hemi === hemi)); });
       decorBtns.forEach(function (b) { b.setAttribute("aria-checked", String(b.dataset.decor === (reduceMotion ? "off" : decor))); });
       cards.forEach(function (c) { c.setAttribute("aria-checked", String(c.dataset.scheme === scheme)); });
       autoSub.textContent = "Today: " + byId[forDate(new Date())].label + ". Changes with the seasons and holidays.";
@@ -261,7 +256,7 @@
         });
       });
     }
-    arrows(modeBtns, 3); arrows(styleBtns, 3); arrows(hemiBtns, 2); arrows(decorBtns, 2); arrows(cards, 3);
+    arrows(modeBtns, 3); arrows(styleBtns, 3); arrows(decorBtns, 2); arrows(cards, 3);
     // Play the decoration once the map has loaded.
     setTimeout(decorate, 1200);
     if (media && media.addEventListener) media.addEventListener("change", sync);

@@ -2,7 +2,7 @@
    The app shell is cached on install so the map opens offline.
    Map libraries and map data from the CDN are cached the first time they load.
    Bump VERSION whenever any app shell file changes so visitors get the update. */
-var VERSION = "v9";
+var VERSION = "v10";
 var SHELL = "my-maps-shell-" + VERSION;
 var RUNTIME = "my-maps-runtime";
 var SHELL_FILES = [
