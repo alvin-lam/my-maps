@@ -347,7 +347,6 @@
     var text = shareText(), u = encodeURIComponent(siteUrl), tx = encodeURIComponent(text), both = encodeURIComponent(text + " " + siteUrl);
     var links = {
       bluesky: "https://bsky.app/intent/compose?text=" + both,
-      email: "mailto:?subject=" + encodeURIComponent("My Maps") + "&body=" + both,
       facebook: "https://www.facebook.com/sharer/sharer.php?u=" + u,
       linkedin: "https://www.linkedin.com/sharing/share-offsite/?url=" + u,
       pinterest: "https://pinterest.com/pin/create/button/?url=" + u + "&description=" + tx,
@@ -367,8 +366,6 @@
         if (navigator.canShare && navigator.canShare({ files: [file] })) payload.files = [file];
         navigator.share(payload).catch(function () {});
       });
-    } else if (target === "email") {
-      location.href = links.email;
     } else if (links[target]) {
       window.open(links[target], "_blank", "noopener,width=640,height=640");
     }
