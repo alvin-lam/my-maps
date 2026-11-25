@@ -88,7 +88,6 @@ my-maps/
 ├── robots.txt            Search engine crawl rules
 ├── sitemap.xml           Page list for search engines
 ├── vendor/               D3, TopoJSON Client and gifenc, with licenses
-├── .github/workflows/    Deployment to GitHub Pages
 ├── CNAME                 Custom domain for GitHub Pages
 └── README.md
 ```
@@ -167,7 +166,6 @@ The site follows the hardening in `atc-web-template`:
 - **Content Security Policy:** A `<meta>` policy in `index.html` and `privacy.html` lets scripts, styles, fonts, data and the offline worker load only from this site. There is no inline code and no `eval`, and the page makes no requests to other services.
 - **Trusted Types:** The browser blocks `innerHTML` and similar HTML sinks. Build interface with `textContent`, `createElement` and `replaceChildren`. The only allowed policy, `my-maps-sw`, approves the offline worker's address (`sw.js`) and nothing else.
 - **Offline cache:** The service worker saves only successful, same-site responses, each under its own address.
-- **Deployment:** Only the site files are published (see Deployment), so build scripts and repository files are not public.
 
 Keep the policy the same in both pages. If a feature needs another source or an HTML sink, add it to both pages' policies and to the Cloudflare header below.
 
@@ -190,7 +188,7 @@ Add `preload` to the HSTS header only when every subdomain of alltripsconsidered
 
 ## Deployment
 
-The workflow in `.github/workflows/pages.yml` publishes only the site files (pages, `css`, `js`, `data`, `assets`, `vendor`, the manifest, the offline worker, `robots.txt`, `sitemap.xml` and `CNAME`) on every push to `prod`. Set **Settings > Pages > Source** to **GitHub Actions** for it to take effect; until then, Pages keeps serving the whole branch. The `CNAME` file and the custom domain setting point it to `mymaps.alltripsconsidered.com`.
+GitHub Pages publishes the `prod` branch from the root folder (**Settings > Pages > Source: Deploy from a branch**). The `CNAME` file points it to `mymaps.alltripsconsidered.com`. Because the whole branch is published, repository files such as this README and `scripts/` can also be opened on the site. They hold no secrets, and the repository is public anyway.
 
 ## Roadmap
 
