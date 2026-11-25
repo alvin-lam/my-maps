@@ -5,6 +5,8 @@
   var LABEL = { visited: "Visited", planning: "Planning", lived: "Lived", living: "Living" };
   var data = load();
   var countries = [], byId = {}, selectedId = null;
+  // A colored status dot. Built with DOM calls (no HTML strings), as the Content Security Policy requires.
+  function dot(status) { var i = document.createElement("i"); i.className = "dot dot-" + status; return i; }
   // Numbers, dates and sorting follow the device's language and region settings.
   var fmtNum = function (n) { try { return new Intl.NumberFormat().format(n); } catch (e) { return String(n); } };
   var fmtDate = function (d) { try { return d.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" }); } catch (e) { return d.toDateString(); } };
@@ -80,10 +82,10 @@
     STATUSES.forEach(function (s) {
       document.getElementById("count-" + s).textContent = fmtNum(Object.keys(data).filter(function (k) { return data[k] === s && byId[k]; }).length);
     });
-    var grid = document.getElementById("lists-grid"); grid.innerHTML = "";
+    var grid = document.getElementById("lists-grid"); grid.replaceChildren();
     STATUSES.forEach(function (s) {
       var col = document.createElement("div");
-      var h = document.createElement("h3"); h.innerHTML = '<i class="dot dot-' + s + '"></i>'; h.appendChild(document.createTextNode(LABEL[s])); col.appendChild(h);
+      var h = document.createElement("h3"); h.appendChild(dot(s)); h.appendChild(document.createTextNode(LABEL[s])); col.appendChild(h);
       var names = countries.filter(function (c) { return data[c.key] === s; }).map(fullName);
       var n = document.createElement("span"); n.className = "lists-count"; n.textContent = fmtNum(names.length); h.appendChild(n);
       if (!names.length) { var p = document.createElement("p"); p.className = "none"; p.textContent = "None yet"; col.appendChild(p); }
@@ -139,7 +141,7 @@
     var file = window.File ? new File([blob], name, { type: blob.type }) : null;
     if (file && navigator.canShare && navigator.canShare({ files: [file] })) navigator.share({ files: [file], title: "My Maps" }).catch(function () {});
     var t = document.getElementById("app-toast"); if (!t) return;
-    t.innerHTML = "";
+    t.replaceChildren();
     var s = document.createElement("span");
     s.textContent = IN_APP ? "This app's browser can't save files. Open My Maps in your phone's browser and add it to your Home Screen." : "This browser can't save files. Add My Maps to your Home Screen to save your maps and lists.";
     t.appendChild(s);
@@ -245,13 +247,13 @@
   var gifBusy = false;
   function gifToast(text) {
     var t = document.getElementById("app-toast"); if (!t) return;
-    t.innerHTML = ""; var s = document.createElement("span"); s.textContent = text; t.appendChild(s); t.hidden = !text;
+    t.replaceChildren(); var s = document.createElement("span"); s.textContent = text; t.appendChild(s); t.hidden = !text;
   }
   function makeGif(base, mapTop) {
     if (gifBusy) return; gifBusy = true;
     var dec = window.MyMapsDecor && window.MyMapsDecor.make(W, H);
     gifToast(dec ? "Making your animated GIF…" : "Making your GIF…");
-    import("https://cdn.jsdelivr.net/npm/gifenc@1.0.3/dist/gifenc.esm.js").then(function (g) {
+    import("../vendor/gifenc-1.0.3.esm.js").then(function (g) {
       var fw = base.width, fh = base.height, frame = document.createElement("canvas");
       frame.width = fw; frame.height = fh;
       var ctx = frame.getContext("2d", { willReadFrequently: true }), enc = g.GIFEncoder();
@@ -310,7 +312,7 @@
   }
   function toast(text) {
     var t = document.getElementById("app-toast"); if (!t) return;
-    t.innerHTML = ""; var s = document.createElement("span"); s.textContent = text; t.appendChild(s); t.hidden = false;
+    t.replaceChildren(); var s = document.createElement("span"); s.textContent = text; t.appendChild(s); t.hidden = false;
     clearTimeout(toast.timer); toast.timer = setTimeout(function () { t.hidden = true; }, 3000);
   }
   function share(target) {
@@ -345,11 +347,11 @@
     matches = countries.filter(function (c) { var k = codes(c); return norm(c.properties.name).indexOf(q) !== -1 || (k && (norm(k.a2) === q || norm(k.a3) === q)); })
       .sort(function (a, b) { return (norm(a.properties.name).indexOf(q) === 0 ? 0 : 1) - (norm(b.properties.name).indexOf(q) === 0 ? 0 : 1); }).slice(0, 8);
     active = matches.length ? 0 : -1;
-    list.innerHTML = "";
+    list.replaceChildren();
     if (!matches.length) { var li = document.createElement("li"); li.className = "empty"; li.textContent = "No matching country"; list.appendChild(li); }
     matches.forEach(function (c, i) {
       var li = document.createElement("li"); li.id = "opt-" + i; li.setAttribute("role", "option");
-      li.innerHTML = '<i class="dot dot-' + (data[c.key] || "none") + '"></i>';
+      li.appendChild(dot(data[c.key] || "none"));
       li.appendChild(document.createTextNode(fullName(c)));
       li.addEventListener("mousedown", function (e) { e.preventDefault(); pick(i); });
       list.appendChild(li);

@@ -42,7 +42,7 @@
     return null;
   }
 
-  var SHARE = '<span class="share-glyph" aria-hidden="true"></span>';
+  function shareGlyph() { var s = document.createElement("span"); s.className = "share-glyph"; s.setAttribute("aria-hidden", "true"); return s; }
   function fill() {
     var m = method();
     acceptBtn.hidden = m !== "prompt";
@@ -51,8 +51,8 @@
       instructions.textContent = "Open it like an app and use it offline.";
     } else if (m === "ios") {
       title.textContent = "Add My Maps to your Home Screen";
-      instructions.innerHTML = "Tap " + SHARE + " Share " + (isIPad ? "at the top of the screen" : "below") +
-        ', then "Add to Home Screen".';
+      instructions.replaceChildren("Tap ", shareGlyph(), " Share " + (isIPad ? "at the top of the screen" : "below") +
+        ', then "Add to Home Screen".');
     } else if (m === "ios-other") {
       title.textContent = "Add My Maps to your Home Screen";
       instructions.textContent = "Open this page in Safari, then tap Share and \"Add to Home Screen\".";
@@ -117,7 +117,7 @@
   function showToast(text, actionLabel, action) {
     if (!toast) return;
     clearTimeout(toastTimer);
-    toast.innerHTML = "";
+    toast.replaceChildren();
     var span = document.createElement("span"); span.textContent = text; toast.appendChild(span);
     if (actionLabel) {
       var b = document.createElement("button"); b.type = "button"; b.className = "btn btn-primary"; b.textContent = actionLabel;
@@ -139,7 +139,14 @@
   });
   window.addEventListener("load", function () {
     var firstInstall = !navigator.serviceWorker.controller;
-    navigator.serviceWorker.register("sw.js").then(function (reg) {
+    // Trusted Types is enforced, so the worker's address must come from a named policy that allows only sw.js.
+    var swUrl = "sw.js";
+    if (window.trustedTypes && trustedTypes.createPolicy) {
+      swUrl = trustedTypes.createPolicy("my-maps-sw", {
+        createScriptURL: function (u) { if (u === "sw.js") return u; throw new TypeError("Blocked script URL: " + u); }
+      }).createScriptURL("sw.js");
+    }
+    navigator.serviceWorker.register(swUrl).then(function (reg) {
       function offerUpdate(worker) {
         showToast("A new version of My Maps is ready.", "Reload", function () { worker.postMessage("skip-waiting"); });
       }

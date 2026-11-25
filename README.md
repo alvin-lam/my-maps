@@ -82,10 +82,13 @@ my-maps/
 │   ├── icon-512.png      App icon, large
 │   ├── icon-maskable-512.png  App icon for Android home screens
 │   ├── apple-touch-icon.png   App icon for iPhone and iPad
+│   ├── fonts/            Instrument Serif and its license
 │   ├── og-image.png      Preview image for links shared on social media
 │   └── tabicon.png       Alternate tab icon
 ├── robots.txt            Search engine crawl rules
 ├── sitemap.xml           Page list for search engines
+├── vendor/               D3, TopoJSON Client and gifenc, with licenses
+├── .github/workflows/    Deployment to GitHub Pages
 ├── CNAME                 Custom domain for GitHub Pages
 └── README.md
 ```
@@ -102,11 +105,14 @@ Then open http://localhost:8000 in your browser.
 
 ## Dependencies
 
-The site loads these from the jsDelivr CDN:
+Everything is served from the site itself, from the `vendor` folder, with licenses in `vendor/licenses`:
 
 - [D3](https://d3js.org) 7.9.0 for the map projection and zoom
 - [TopoJSON Client](https://github.com/topojson/topojson-client) 3.1.0 for reading the map shapes
 - [gifenc](https://github.com/mattdesl/gifenc) 1.0.3 for GIF downloads, loaded only when a GIF is requested
+- [Instrument Serif](https://fonts.google.com/specimen/Instrument+Serif) for the title, in `assets/fonts`, under the SIL Open Font License (`assets/fonts/OFL.txt`)
+
+To update a library, replace its file with one whose name carries the new version, update the `<script>` tag or import, and add the file to `SHELL_FILES` in `sw.js`.
 
 The map data is served from the site itself. Country borders come from [World Atlas](https://github.com/topojson/world-atlas) 2.0.2, and disputed area outlines come from [Natural Earth](https://www.naturalearthdata.com). Both are in the public domain.
 
@@ -154,15 +160,43 @@ The service worker caches the site for offline use. After you change any file, r
 
 The page has a descriptive title and description, a canonical link, Open Graph and X (Twitter) tags with a preview image, and structured data that describes it as a free web app. `robots.txt` allows crawling and points to `sitemap.xml`. Update `lastmod` in the sitemap after a major change.
 
+## Security
+
+The site follows the hardening in `atc-web-template`:
+
+- **Content Security Policy:** A `<meta>` policy in `index.html` and `privacy.html` lets scripts, styles, fonts, data and the offline worker load only from this site. There is no inline code and no `eval`, and the page makes no requests to other services.
+- **Trusted Types:** The browser blocks `innerHTML` and similar HTML sinks. Build interface with `textContent`, `createElement` and `replaceChildren`. The only allowed policy, `my-maps-sw`, approves the offline worker's address (`sw.js`) and nothing else.
+- **Offline cache:** The service worker saves only successful, same-site responses, each under its own address.
+- **Deployment:** Only the site files are published (see Deployment), so build scripts and repository files are not public.
+
+Keep the policy the same in both pages. If a feature needs another source or an HTML sink, add it to both pages' policies and to the Cloudflare header below.
+
+### Headers to set in Cloudflare
+
+GitHub Pages cannot send custom headers, and a `<meta>` policy cannot set `frame-ancestors`. With the DNS record proxied (orange cloud), add these in Cloudflare under **Rules > Transform Rules > Modify Response Header** for `mymaps.alltripsconsidered.com`:
+
+```
+Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: blob:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; require-trusted-types-for 'script'; trusted-types my-maps-sw; upgrade-insecure-requests
+Strict-Transport-Security: max-age=63072000; includeSubDomains
+X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+Referrer-Policy: strict-origin-when-cross-origin
+Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()
+Cross-Origin-Opener-Policy: same-origin
+Cross-Origin-Resource-Policy: same-origin
+```
+
+Add `preload` to the HSTS header only when every subdomain of alltripsconsidered.com serves HTTPS, and only then submit the domain to hstspreload.org.
+
 ## Deployment
 
-GitHub Pages serves the site from the repository's publishing branch. The `CNAME` file points it to the custom domain.
+The workflow in `.github/workflows/pages.yml` publishes only the site files (pages, `css`, `js`, `data`, `assets`, `vendor`, the manifest, the offline worker, `robots.txt`, `sitemap.xml` and `CNAME`) on every push to `prod`. Set **Settings > Pages > Source** to **GitHub Actions** for it to take effect; until then, Pages keeps serving the whole branch. The `CNAME` file and the custom domain setting point it to `mymaps.alltripsconsidered.com`.
 
 ## Roadmap
 
 1. **Import and backup:** Add an Import button that loads an exported JSON file, so visitors can restore their map after clearing their browser or switching devices. Remind visitors to back up after they mark 10 or more places.
 2. **Real-device testing:** Confirm on real phones that downloads and sharing work in Safari, Chrome and the installed app, that Add to Home Screen works on iPhone and Android, and that the app opens offline. Check the Diwali dates from 2028 onward against a calendar.
-3. **Self-hosted libraries:** Serve D3 and the TopoJSON reader from the site instead of jsDelivr, ideally with only the D3 parts the map uses, so the map draws even when the CDN is slow or blocked.
+3. **Smaller D3:** D3 is now served from the site, but in full. Bundling only the parts the map uses would cut about 200 KB.
 4. **Accessibility review:** Check color contrast in every scheme, especially holiday schemes in dark mode and the Vintage style. Add a "Skip to search" link so keyboard users do not have to tab through every country, and make sure counts and messages are announced by screen readers.
 5. **Repository housekeeping:** Confirm GitHub Pages publishes from `prod`, redirect the old `world.alltripsconsidered.com` address, and update local checkouts to the renamed repository.
 6. **Search and growth:** Add a "How it works" and FAQ section with FAQ structured data, a 404 page, shareable map links, links to My Maps from alltripsconsidered.com, and submit the sitemap in Google Search Console and Bing Webmaster Tools.

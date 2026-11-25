@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: blob:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; require-trusted-types-for 'script'; trusted-types my-maps-sw; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Privacy | My Maps</title>
 <meta name="description" content="How My Maps handles your information: your map stays in your browser, with no accounts, cookies or tracking.">
@@ -19,21 +21,9 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#f5f6f8" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#12151b" media="(prefers-color-scheme: dark)">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif&display=swap">
+<link rel="preload" href="assets/fonts/instrument-serif-v5-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="css/styles.css">
 <script src="js/appearance.js"></script>
-<style>
-  .policy { line-height: 1.6; }
-  .policy h2 { font-size: 1.1rem; margin: 24px 0 8px; }
-  .policy h2:first-child { margin-top: 0; }
-  .policy p, .policy ul { margin: 0 0 12px; }
-  .policy ul { padding-left: 22px; }
-  .policy li { margin-bottom: 6px; }
-  .back-link { display: inline-block; margin-top: 8px; color: var(--primary); font-weight: 600; text-decoration: none; }
-  .back-link:hover, .back-link:focus-visible { text-decoration: underline; }
-</style>
 </head>
 <body>
   <main class="container">
@@ -54,14 +44,8 @@
       <h2>What is saved on your device</h2>
       <p>My Maps uses your browser's local storage to remember the places you mark, your appearance settings and whether you have dismissed a message. Installing the app also keeps a copy of the site on your device so it works offline. This information stays on your device. Clearing your browser data or uninstalling the app removes it, and it cannot be recovered by us.</p>
 
-      <h2>Services the page loads from</h2>
-      <p>To show the page, your browser downloads a few files from other services. Like any website request, these services can see your IP address and basic browser details, under their own privacy policies:</p>
-      <ul>
-        <li><strong>jsDelivr</strong> provides the map drawing tools, and the GIF tool when you download a GIF.</li>
-        <li><strong>Google Fonts</strong> provides the All Trips Considered title font.</li>
-        <li><strong>GitHub Pages</strong> hosts the site itself.</li>
-      </ul>
-      <p>None of these services receive the places you mark.</p>
+      <h2>Where the site is served from</h2>
+      <p>Every file the page uses, including the map tools, map data and fonts, comes from this site. The page makes no requests to other services. The site is hosted on <strong>GitHub Pages</strong>, and its address is managed by <strong>Cloudflare</strong>. Like any website, these services can see your IP address and basic browser details when you visit, under their own privacy policies. Neither receives the places you mark.</p>
 
       <h2>When you share</h2>
       <p>The Share menu opens the network you choose, such as Facebook or WhatsApp, with a link to My Maps and a short message. The message may include how many places you have been to. Nothing is posted until you confirm it on that network, and what happens next is covered by that network's privacy policy.</p>
@@ -78,7 +62,7 @@
       <h2>Contact</h2>
       <p>Questions can be sent through <a href="https://alltripsconsidered.com">All Trips Considered</a>.</p>
 
-      <p><em>Last updated: November 24, 2026</em></p>
+      <p><em>Last updated: November 25, 2026</em></p>
       <a class="back-link" href="./">← Back to My Maps</a>
     </section>
 
@@ -86,6 +70,6 @@
       <p class="copyright">© <span id="copyright-year">2026</span> <a href="https://alltripsconsidered.com">All Trips Considered</a>. All rights reserved.</p>
     </footer>
   </main>
-  <script>try { document.getElementById("copyright-year").textContent = new Date().getFullYear(); } catch (e) {}</script>
+  <script src="js/back-to-top.js"></script>
 </body>
 </html>

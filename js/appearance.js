@@ -270,7 +270,7 @@
       if (toast && get(ACK_KEY) !== tag) {
         setTimeout(function () {
           if (!toast.hidden) return;
-          toast.innerHTML = "";
+          toast.replaceChildren();
           var msg = document.createElement("span"); msg.textContent = byId[r].emoji + " " + byId[r].label + " colors are on."; toast.appendChild(msg);
           [["Keep", false], ["Use Classic", true]].forEach(function (o) {
             var b = document.createElement("button"); b.type = "button"; b.className = o[1] ? "btn btn-ghost" : "btn btn-primary"; b.textContent = o[0];

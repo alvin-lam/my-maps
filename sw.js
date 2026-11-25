@@ -1,8 +1,8 @@
 /* Service worker for My Maps.
-   The app shell is cached on install so the map opens offline.
-   Map libraries and map data from the CDN are cached the first time they load.
+   The app shell, map libraries, font and map data are all served from this site
+   and cached on install so the map opens offline. The GIF tool is cached the first time it is used.
    Bump VERSION whenever any app shell file changes so visitors get the update. */
-var VERSION = "v31";
+var VERSION = "v32";
 var SHELL = "my-maps-shell-" + VERSION;
 var RUNTIME = "my-maps-runtime";
 var SHELL_FILES = [
@@ -15,6 +15,10 @@ var SHELL_FILES = [
   "js/appearance.js",
   "js/back-to-top.js",
   "js/map.js",
+  "vendor/d3-7.9.0.min.js",
+  "vendor/topojson-client-3.1.0.min.js",
+  "assets/fonts/instrument-serif-v5-latin.woff2",
+  "assets/fonts/instrument-serif-v5-latin-ext.woff2",
   "data/world.json",
   "data/places.json",
   "assets/icon.png?v=3",
@@ -22,7 +26,6 @@ var SHELL_FILES = [
   "assets/icon-512.png",
   "assets/apple-touch-icon.png"
 ];
-var CDN_HOSTS = ["cdn.jsdelivr.net", "fonts.googleapis.com", "fonts.gstatic.com"];
 
 self.addEventListener("install", function (event) {
   event.waitUntil(caches.open(SHELL).then(function (cache) { return cache.addAll(SHELL_FILES); }));
@@ -51,22 +54,11 @@ self.addEventListener("fetch", function (event) {
   if (req.mode === "navigate") {
     event.respondWith(
       fetch(req).then(function (res) {
-        var copy = res.clone();
-        caches.open(SHELL).then(function (c) { c.put("index.html", copy); });
+        // Save each page under its own address, and only good, same-site responses.
+        if (res.ok && res.type === "basic") { var copy = res.clone(); caches.open(SHELL).then(function (c) { c.put(req, copy); }); }
         return res;
-      }).catch(function () { return caches.match("index.html"); })
-    );
-    return;
-  }
-
-  // Versioned CDN files never change, so serve them from the cache once stored.
-  if (CDN_HOSTS.indexOf(url.hostname) !== -1) {
-    event.respondWith(
-      caches.match(req).then(function (hit) {
-        return hit || fetch(req).then(function (res) {
-          if (res.ok || res.type === "opaque") { var copy = res.clone(); caches.open(RUNTIME).then(function (c) { c.put(req, copy); }); }
-          return res;
-        });
+      }).catch(function () {
+        return caches.match(req).then(function (hit) { return hit || caches.match("index.html"); });
       })
     );
     return;
