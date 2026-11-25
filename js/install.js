@@ -5,13 +5,13 @@
        iPhone and iPad Safari get Share menu steps.
        Safari on a Mac gets the Add to Dock steps.
    - Waits until the visitor has used the page before asking, and snoozes for
-     30 days after "Not now". The footer "Install app" button always works.
+     24 hours after "Close". The footer "Install app" button always works.
    - Offers a Reload button when a new version is ready, and notes when the
      map is saved for offline use or the connection drops. */
 (function () {
   "use strict";
   var SNOOZE_KEY = "my-maps-install-snoozed-until";
-  var SNOOZE_DAYS = 30;
+  var SNOOZE_HOURS = 24;
   var banner = document.getElementById("install-banner");
   var title = document.getElementById("install-title");
   var acceptBtn = document.getElementById("install-accept");
@@ -73,7 +73,7 @@
   function hide(snooze) {
     banner.hidden = true;
     document.body.classList.remove("has-install-banner");
-    if (snooze) set(SNOOZE_KEY, String(Date.now() + SNOOZE_DAYS * 864e5));
+    if (snooze) set(SNOOZE_KEY, String(Date.now() + SNOOZE_HOURS * 36e5));
   }
   function snoozed() { return Number(get(SNOOZE_KEY) || 0) > Date.now(); }
   // Lets other parts of the page open the install steps, for example when a download is not possible.
