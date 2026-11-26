@@ -201,6 +201,8 @@ GitHub Pages publishes the `/docs` folder of the `prod` branch (**Settings > Pag
   - [gifenc](https://github.com/mattdesl/gifenc) 1.0.3 for GIF downloads, loaded only when a GIF is requested.
 - **Map data:** Country borders come from [World Atlas](https://github.com/topojson/world-atlas) 2.0.2, and disputed area outlines come from [Natural Earth](https://www.naturalearthdata.com). Both are in the public domain.
 
-<img src="docs/assets/icon-512.png" alt="My Maps app icon" width="96" height="96">
+<p align="center">
+  <img src="docs/assets/icon-512.png" alt="My Maps app icon" width="96" height="96">
+</p>
 
-© 2026 All Trips Considered. All rights reserved.
+<p align="center">© 2026 All Trips Considered. All rights reserved.</p>
