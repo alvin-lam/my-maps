@@ -1,75 +1,84 @@
 <!doctype html>
+<!-- Standard All Trips Considered privacy page. Keep the section order and wording in step with the other apps. -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: blob:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; require-trusted-types-for 'script'; trusted-types my-maps-sw; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Privacy | My Maps</title>
-<meta name="description" content="How My Maps handles your information: your map stays in your browser, with no accounts, cookies or tracking.">
-<link rel="canonical" href="https://mymaps.alltripsconsidered.com/privacy.html">
-<meta name="robots" content="index, follow">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="All Trips Considered">
-<meta property="og:title" content="Privacy | My Maps">
-<meta property="og:description" content="How My Maps handles your information: your map stays in your browser, with no accounts, cookies or tracking.">
-<meta property="og:url" content="https://mymaps.alltripsconsidered.com/privacy.html">
-<meta property="og:image" content="https://mymaps.alltripsconsidered.com/assets/og-image.png">
-<meta name="twitter:card" content="summary_large_image">
-<link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png">
-<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
-<link rel="manifest" href="manifest.webmanifest">
+<meta name="description" content="How My Maps handles your information: everything you enter stays on your device.">
 <meta name="theme-color" content="#f5f6f8" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#12151b" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png">
+<link rel="icon" type="image/png" href="assets/icon.png?v=3">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="preload" href="assets/fonts/instrument-serif-v5-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/privacy.css">
 <script src="js/appearance.js"></script>
 </head>
 <body>
-  <main class="container">
-    <header class="page-header">
-      <p class="brand"><a href="https://alltripsconsidered.com" target="_blank" rel="noopener">All Trips Considered</a></p>
-      <h1>Privacy</h1>
-      <p class="lede">My Maps keeps your map on your own device.</p>
-    </header>
+<main class="privacy">
+  <header class="privacy-header">
+    <p class="privacy-brand"><a href="https://alltripsconsidered.com">All Trips Considered</a></p>
+    <h1>Privacy</h1>
+    <p class="privacy-app">My Maps</p>
+    <p class="privacy-updated">Last updated: November 26, 2026</p>
+  </header>
 
-    <section class="card policy">
-      <h2>The short version</h2>
-      <ul>
-        <li>There are no accounts, no cookies and no tracking or analytics.</li>
-        <li>The places you mark and your settings are saved only in your browser, on your device.</li>
-        <li>We never receive, see or store your map.</li>
-      </ul>
+  <p class="privacy-back privacy-back-top"><a href="./">Back to My Maps</a></p>
 
-      <h2>What is saved on your device</h2>
-      <p>My Maps uses your browser's local storage to remember the places you mark, your appearance settings and whether you have dismissed a message. Installing the app also keeps a copy of the site on your device so it works offline. This information stays on your device. Clearing your browser data or uninstalling the app removes it, and it cannot be recovered by us.</p>
+  <section class="privacy-section" aria-labelledby="short">
+    <h2 id="short">The short version</h2>
+    <p>Everything you enter stays in this browser on this device. My Maps has no accounts, cookies, analytics, advertising or tracking. We never receive, see or store what you enter.</p>
+  </section>
 
-      <h2>Where the site is served from</h2>
-      <p>Every file the page uses, including the map tools, map data and fonts, comes from this site. The page makes no requests to other services. The site is hosted on <strong>GitHub Pages</strong>, and its address is managed by <strong>Cloudflare</strong>. Like any website, these services can see your IP address and basic browser details when you visit, under their own privacy policies. Neither receives the places you mark.</p>
+  <section class="privacy-section" aria-labelledby="saved">
+    <h2 id="saved">What is saved on your device</h2>
+    <p>My Maps saves the following in your browser's local storage so it is still there next time:</p>
+    <ul>
+      <li>The places you mark.</li>
+      <li>Your map appearance and color scheme.</li>
+      <li>Whether you have seen a holiday message.</li>
+      <li>When you closed the Add to Home Screen message.</li>
+    </ul>
+    <p>Installing the app also keeps a copy of the site on your device so it works offline. Clearing your browser's site data or uninstalling the app removes everything, and we cannot recover it.</p>
+  </section>
 
-      <h2>When you share</h2>
-      <p>The Share menu opens the network you choose, such as Facebook or WhatsApp, with a link to My Maps and a short message. The message may include how many places you have been to. Nothing is posted until you confirm it on that network, and what happens next is covered by that network's privacy policy.</p>
+  <section class="privacy-section" aria-labelledby="device">
+    <h2 id="device">What your device tells My Maps</h2>
+    <p>My Maps reads your device's time zone and language setting to format dates, numbers and units and to choose season and holiday colors. These settings are used only on your device and never leave it.</p>
+  </section>
 
-      <h2>Exports and downloads</h2>
-      <p>Lists and images you export or download are created on your device and saved where you choose. They are not uploaded anywhere.</p>
+  <section class="privacy-section" aria-labelledby="files">
+    <h2 id="files">Files you export or share</h2>
+    <p>Files you export, such as lists and images, are created on your device and saved where you choose. They are not uploaded anywhere. When you use Share, My Maps opens the app or website you pick with a link and a short message. Nothing is posted until you confirm it there, and that service's privacy policy then applies.</p>
+  </section>
 
-      <h2>Children</h2>
-      <p>My Maps does not collect personal information from anyone, including children.</p>
+  <section class="privacy-section" aria-labelledby="hosting">
+    <h2 id="hosting">Where the site is served from</h2>
+    <p>Every file the page uses, including its fonts and data, comes from this site. The page makes no requests to other services. <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" rel="noopener noreferrer">GitHub Pages</a> hosts the site, and <a href="https://www.cloudflare.com/privacypolicy/" rel="noopener noreferrer">Cloudflare</a> provides its domain name service. Like any website, these services can see your IP address and basic browser details when you visit, under their own privacy policies. Neither receives what you enter.</p>
+  </section>
 
-      <h2>Changes</h2>
-      <p>If My Maps ever adds features that collect information, such as analytics, this page will be updated first and will explain what is collected and why. Where the law requires it, you will be asked for consent.</p>
+  <section class="privacy-section" aria-labelledby="children">
+    <h2 id="children">Children</h2>
+    <p>My Maps does not collect personal information from anyone, including children.</p>
+  </section>
 
-      <h2>Contact</h2>
-      <p>Questions can be sent through <a href="https://alltripsconsidered.com">All Trips Considered</a>.</p>
+  <section class="privacy-section" aria-labelledby="changes">
+    <h2 id="changes">Changes</h2>
+    <p>If My Maps ever starts collecting information, such as anonymous visit counts, this page will be updated first to explain what is collected and why. Where the law requires it, you will be asked for consent first.</p>
+  </section>
 
-      <p><em>Last updated: November 25, 2026</em></p>
-      <a class="back-link" href="./">← Back to My Maps</a>
-    </section>
+  <section class="privacy-section" aria-labelledby="contact">
+    <h2 id="contact">Contact</h2>
+    <p>Questions about privacy can be sent to report[at]alltripsconsidered[dot]com.</p>
+  </section>
 
-    <footer class="disclaimer">
-      <p class="copyright">© <span id="copyright-year">2026</span> <a href="https://alltripsconsidered.com">All Trips Considered</a>. All rights reserved.</p>
-    </footer>
-  </main>
-  <script src="js/back-to-top.js"></script>
+  <footer class="privacy-footer">
+    <p class="privacy-back"><a href="./">Back to My Maps</a></p>
+    <p class="privacy-copyright">© 2026 <a href="https://alltripsconsidered.com">All Trips Considered</a>. All rights reserved.</p>
+  </footer>
+</main>
 </body>
 </html>
