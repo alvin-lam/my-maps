@@ -76,7 +76,10 @@ docs/assets/icon-192.png                App icon, small
 docs/assets/icon-512.png                App icon, large
 docs/assets/icon-maskable-512.png       App icon for Android home screens
 docs/assets/apple-touch-icon.png        App icon for iPhone and iPad
-docs/assets/tabicon.png                 Alternate tab icon
+docs/assets/tabicon.png                 Full-size All Trips Considered artwork
+docs/assets/tabicon-32.png              Browser tab icon: All Trips Considered artwork, 32 px
+docs/assets/tabicon-192.png             Browser tab icon: All Trips Considered artwork, 192 px
+docs/favicon.ico                        Favicon: the globe app icon (16, 32 and 48 px)
 docs/assets/og-image.png                Preview image for links shared on social media
 docs/assets/fonts/                      Instrument Serif and its license (OFL.txt)
 docs/vendor/                            D3, TopoJSON Client and gifenc
