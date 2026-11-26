@@ -54,6 +54,8 @@ Your selections and settings are saved only in your browser's local storage. Not
 
 ## Project structure
 
+Everything the site serves lives in `docs/`, which GitHub Pages publishes. Development files (this README and `scripts/`) stay at the repository root. Paths below for site files are relative to `docs/`.
+
 ```
 my-maps/
 ├── index.html            Page markup
@@ -97,7 +99,7 @@ my-maps/
 The site is static, so any local web server works. From the project folder, run:
 
 ```bash
-python3 -m http.server 8000
+python3 -m http.server 8000 --directory docs
 ```
 
 Then open http://localhost:8000 in your browser.
@@ -188,7 +190,7 @@ Add `preload` to the HSTS header only when every subdomain of alltripsconsidered
 
 ## Deployment
 
-GitHub Pages publishes the `prod` branch from the root folder (**Settings > Pages > Source: Deploy from a branch**). The `CNAME` file points it to `mymaps.alltripsconsidered.com`. Because the whole branch is published, repository files such as this README and `scripts/` can also be opened on the site. They hold no secrets, and the repository is public anyway.
+GitHub Pages publishes the `docs/` folder of the `prod` branch (**Settings > Pages > Source: Deploy from a branch**, folder `/docs`). The `docs/CNAME` file points it to `mymaps.alltripsconsidered.com`. Repository files such as this README and `scripts/` stay outside `docs/`, so they are not published.
 
 ## Roadmap
 

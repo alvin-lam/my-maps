@@ -76,7 +76,7 @@ topo = topojsonClient.quantize(topo, 1e5);
   const flat = g.features.filter((f) => { const a = d3.geoArea(f); return !(a > 0) || Math.abs(a - 4 * Math.PI) < 1e-9; }).map((f) => places[f.id].n);
   if (flat.length) console.warn("Places with no area after simplifying:", flat.join(", "));
 }
-writeFileSync(new URL("../data/world.json", import.meta.url), JSON.stringify(topo));
-writeFileSync(new URL("../data/places.json", import.meta.url), JSON.stringify(places));
+writeFileSync(new URL("../docs/data/world.json", import.meta.url), JSON.stringify(topo));
+writeFileSync(new URL("../docs/data/places.json", import.meta.url), JSON.stringify(places));
 const kb = (s) => (Buffer.byteLength(s) / 1024).toFixed(0) + " KB";
 console.log(`${features.length} places, world.json ${kb(JSON.stringify(topo))}, places.json ${kb(JSON.stringify(places))}`);
