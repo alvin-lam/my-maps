@@ -2,7 +2,7 @@
    The app shell, map libraries, font and map data are all served from this site
    and cached on install so the map opens offline. The GIF tool is cached the first time it is used.
    Bump VERSION whenever any app shell file changes so visitors get the update. */
-var VERSION = "v32";
+var VERSION = "v33";
 var SHELL = "my-maps-shell-" + VERSION;
 var RUNTIME = "my-maps-runtime";
 var SHELL_FILES = [
