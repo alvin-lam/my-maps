@@ -147,7 +147,20 @@ Replace the file in `docs/vendor/` with one whose name carries the new version. 
 
 ### Search engines
 
-The page has a descriptive title and description, a canonical link, Open Graph and X (Twitter) tags with a preview image, and structured data that describes it as a free web app. `docs/robots.txt` allows crawling and points to `docs/sitemap.xml`. Update `lastmod` in the sitemap after a major change.
+The page's search and sharing details live in the `<head>` of `docs/index.html`:
+
+| Item | Value |
+|---|---|
+| Page title | My Maps \| All Trips Considered |
+| Description | Free travel map. Mark countries you have visited, plan to visit, lived in or live in now, then download or share your map. Works offline. |
+| Social title (Open Graph, X) | My Maps: Free Travel Map of the Countries You Have Visited |
+| Preview image | `docs/assets/og-image.png`, 1200 × 630, with alt text |
+| Canonical address | https://mymaps.alltripsconsidered.com/ |
+| Structured data | WebApplication, Organization, WebSite and an ItemList of the Travel Tools |
+
+Keep the page title under about 60 characters and the description under about 150, so search results show them in full. The same description is used in the social tags, the structured data and `docs/manifest.webmanifest`; change it in all four places together.
+
+`docs/robots.txt` allows crawling and points to `docs/sitemap.xml`. After a major change, update `lastmod` in the sitemap and `dateModified` in the structured data.
 
 ### Privacy policy
 
