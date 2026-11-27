@@ -185,63 +185,6 @@
   }
 
   function esc(t) { return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
-  function downloadImage(fmt, onBlob) {
-    if (!pathsSel) return;
-    var cs = getComputedStyle(document.documentElement);
-    function v(n) { return cs.getPropertyValue(n).trim(); }
-    var col = { none: v("--land"), visited: v("--visited"), planning: v("--planning"), lived: v("--lived"), living: v("--living") };
-    var padTop = 90, padBottom = 100, TH = H + padTop + padBottom, SITE = "mymaps.alltripsconsidered.com";
-    var items = grouped().map(function (g) { return { s: g.s, t: LABEL[g.s] + " " + fmtNum(g.names.length) }; });
-
-    if (fmt === "svg") {
-      var sp = d3.geoPath(projection), font = "system-ui, -apple-system, sans-serif";
-      var o = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + W + ' ' + TH + '" width="' + W * 2 + '" height="' + TH * 2 + '">',
-        '<rect width="100%" height="100%" fill="' + v("--surface") + '"/>',
-        '<rect y="' + padTop + '" width="' + W + '" height="' + H + '" fill="' + v("--sea") + '"/>',
-        '<text x="' + W / 2 + '" y="42" text-anchor="middle" font-family="Instrument Serif, Georgia, serif" font-size="34" fill="' + v("--brand-link") + '">All Trips Considered</text>',
-        '<text x="' + W / 2 + '" y="72" text-anchor="middle" font-family="' + font + '" font-size="20" font-weight="600" fill="' + v("--text") + '">My Maps</text>',
-        '<g transform="translate(0,' + padTop + ')" stroke="' + v("--surface") + '" stroke-width="0.5">'];
-      countries.forEach(function (c) { o.push('<path fill="' + col[data[c.key] || "none"] + '" d="' + sp(c) + '"><title>' + esc(fullName(c)) + '</title></path>'); });
-      markers.forEach(function (m) { o.push('<circle cx="' + m.c[0] + '" cy="' + m.c[1] + '" r="' + MARKER_R + '" fill="' + col[data[m.d.key] || "none"] + '" stroke="' + v("--muted") + '"><title>' + esc(fullName(m.d)) + '</title></circle>'); });
-      o.push('</g>');
-      var x = W / 2 - 250, y = padTop + H + 42;
-      items.forEach(function (it) {
-        o.push('<circle cx="' + (x + 6) + '" cy="' + (y - 5) + '" r="6" fill="' + col[it.s] + '"/><text x="' + (x + 20) + '" y="' + y + '" font-family="' + font + '" font-size="16" fill="' + v("--text") + '">' + it.t + '</text>');
-        x += 130;
-      });
-      o.push('<text x="' + W / 2 + '" y="' + (TH - 22) + '" text-anchor="middle" font-family="' + font + '" font-size="14" fill="' + v("--muted") + '">' + esc(SITE + " · " + fmtDate(new Date())) + '</text>');
-      o.push('</svg>');
-      saveBlob(new Blob([o.join("\n")], { type: "image/svg+xml" }), "my-maps.svg");
-      return;
-    }
-
-    var scale = fmt === "gif" ? 1 : 2, canvas = document.createElement("canvas"); canvas.width = W * scale; canvas.height = TH * scale;
-    var ctx = canvas.getContext("2d"); ctx.scale(scale, scale);
-    ctx.fillStyle = v("--surface"); ctx.fillRect(0, 0, W, TH);
-    ctx.fillStyle = v("--sea"); ctx.fillRect(0, padTop, W, H);
-    ctx.textAlign = "center"; ctx.fillStyle = v("--brand-link");
-    ctx.font = '400 34px "Instrument Serif", Georgia, serif'; ctx.fillText("All Trips Considered", W / 2, 42);
-    ctx.fillStyle = v("--text"); ctx.font = "600 20px system-ui, -apple-system, sans-serif"; ctx.fillText("My Maps", W / 2, 72);
-    ctx.save(); ctx.translate(0, padTop);
-    var p = d3.geoPath(projection, ctx);
-    ctx.strokeStyle = v("--surface"); ctx.lineWidth = 0.5;
-    countries.forEach(function (c) { ctx.beginPath(); p(c); ctx.fillStyle = col[data[c.key] || "none"]; ctx.fill(); ctx.stroke(); });
-    ctx.strokeStyle = v("--muted");
-    markers.forEach(function (m) { ctx.beginPath(); ctx.arc(m.c[0], m.c[1], MARKER_R, 0, Math.PI * 2); ctx.fillStyle = col[data[m.d.key] || "none"]; ctx.fill(); ctx.stroke(); });
-    ctx.restore();
-    ctx.font = "16px system-ui, -apple-system, sans-serif"; ctx.textAlign = "left";
-    var widths = items.map(function (it) { return 22 + ctx.measureText(it.t).width; }), gap = 32;
-    var cx = (W - widths.reduce(function (a, b) { return a + b; }, 0) - gap * (items.length - 1)) / 2, cy = padTop + H + 42;
-    items.forEach(function (it, i) {
-      ctx.fillStyle = col[it.s]; ctx.beginPath(); ctx.arc(cx + 6, cy - 5, 6, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = v("--text"); ctx.fillText(it.t, cx + 20, cy); cx += widths[i] + gap;
-    });
-    ctx.textAlign = "center"; ctx.fillStyle = v("--muted"); ctx.font = "14px system-ui, -apple-system, sans-serif"; ctx.fillText(SITE + " · " + fmtDate(new Date()), W / 2, TH - 22);
-    if (fmt === "gif") { makeGif(canvas, padTop); return; }
-    var jpg = fmt === "jpg";
-    canvas.toBlob(function (b) { if (onBlob) onBlob(b); else saveBlob(b, "my-maps." + fmt); }, jpg ? "image/jpeg" : "image/png", jpg ? 0.92 : undefined);
-  }
-
   // Animated GIF: the map image with the current holiday decoration playing over the map area.
   // The encoder (gifenc) loads only when someone asks for a GIF.
   var gifBusy = false;
@@ -249,7 +192,7 @@
     var t = document.getElementById("app-toast"); if (!t) return;
     t.replaceChildren(); var s = document.createElement("span"); s.textContent = text; t.appendChild(s); t.hidden = !text;
   }
-  function makeGif(base, mapTop) {
+  function makeGif(base, m) {
     if (gifBusy) return; gifBusy = true;
     var dec = window.MyMapsDecor && window.MyMapsDecor.make(W, H);
     gifToast(dec ? "Making your animated GIF…" : "Making your GIF…");
@@ -261,7 +204,7 @@
       function addFrame() {
         ctx.drawImage(base, 0, 0);
         if (dec) {
-          ctx.save(); ctx.beginPath(); ctx.rect(0, mapTop, W, H); ctx.clip(); ctx.translate(0, mapTop);
+          ctx.save(); roundRect(ctx, m.x, m.y, m.w, m.h, m.r); ctx.clip(); ctx.translate(m.ox, m.oy); ctx.scale(m.k, m.k);
           dec.step(ctx, i * delay, delay / 1000);
           ctx.restore();
         }
@@ -327,93 +270,134 @@
   function fitFont(ctx, text, weight, size, family, maxW) {
     do { ctx.font = weight + " " + size + "px " + family; size -= 2; } while (ctx.measureText(text).width > maxW && size > 12);
   }
-  function renderInstagram(size, done) {
-    if (!pathsSel) return;
+  // Works out where everything goes on a share or download image. Sizes are tuned for a 1080 px wide image.
+  var SANS = "system-ui, -apple-system, \"Segoe UI\", sans-serif", SERIF = '"Instrument Serif", Georgia, serif';
+  var measureCtx = document.createElement("canvas").getContext("2d");
+  function fitFont(text, weight, size, family, maxW) {
+    do { measureCtx.font = weight + " " + size + "px " + family; size -= 2; } while (measureCtx.measureText(text).width > maxW && size > 12);
+    return measureCtx.font;
+  }
+  function imageLayout(size) {
     var cs = getComputedStyle(document.documentElement);
     function v(n) { return cs.getPropertyValue(n).trim(); }
-    var col = { none: v("--land"), visited: v("--visited"), planning: v("--planning"), lived: v("--lived"), living: v("--living") };
-    var SANS = "system-ui, -apple-system, \"Segoe UI\", sans-serif", SERIF = '"Instrument Serif", Georgia, serif';
-    var cw = size.w, ch = size.h, wide = ch < cw * .6, story = ch > cw * 1.6;
-    var canvas = document.createElement("canvas"); canvas.width = cw; canvas.height = ch;
-    var ctx = canvas.getContext("2d");
-    // Background: the page color fading into the sea color, so the image matches the chosen scheme.
-    var bg = ctx.createLinearGradient(0, 0, 0, ch); bg.addColorStop(0, v("--bg")); bg.addColorStop(1, v("--sea"));
-    ctx.fillStyle = bg; ctx.fillRect(0, 0, cw, ch);
-    var accent = ctx.createLinearGradient(0, 0, cw, 0);
-    ["--visited", "--planning", "--lived", "--living"].forEach(function (t, i) { accent.addColorStop(i / 3, v(t)); });
-
+    var c = { bg: v("--bg"), sea: v("--sea"), surface: v("--surface"), text: v("--text"), muted: v("--muted"), brand: v("--brand-link"),
+      none: v("--land"), visited: v("--visited"), planning: v("--planning"), lived: v("--lived"), living: v("--living") };
+    var cw = size.w, ch = size.h, wide = ch < cw * .6, story = ch > cw * 1.6, tall = size.name === "portrait";
     var been = Object.keys(data).filter(function (k) { return (data[k] === "visited" || data[k] === "lived" || data[k] === "living") && byId[k]; }).length;
     var headline = been ? "I've been to " + fmtNum(been) + (been === 1 ? " country" : " countries") : "My travel map";
     var items = grouped().map(function (g) { return { s: g.s, text: LABEL[g.s] + " " + fmtNum(g.names.length) }; });
-
-    // Safe area and block sizes for each shape.
-    var safeTop = story ? 250 : wide ? 36 : 72, safeBottom = story ? 250 : wide ? 32 : 64, side = wide ? 48 : 64;
-    var innerW = cw - side * 2;
-    var tall = size.name === "portrait";
+    // Stories and Reels cover about 250 px at the top and bottom with their own controls.
+    var safeTop = story ? 250 : wide ? 36 : 72, safeBottom = story ? 250 : wide ? 32 : 64, side = wide ? 48 : 64, innerW = cw - side * 2;
     var brandH = wide ? 34 : story ? 84 : tall ? 60 : 48, headH = wide ? 58 : story ? 300 : tall ? 120 : 92;
     var chipH = wide ? 44 : story ? 112 : tall ? 88 : 66, chipCols = wide || size.name === "square" ? 4 : 2, chipRows = Math.ceil(items.length / chipCols);
     var chipGap = wide ? 10 : 16, chipsH = chipRows * chipH + (chipRows - 1) * chipGap;
     var urlH = wide ? 26 : story ? 56 : tall ? 44 : 36, gap = wide ? 18 : story ? 64 : tall ? 44 : 30;
-    var availMap = ch - safeTop - safeBottom - brandH - headH - chipsH - urlH - gap * 4;
-    var mapW = innerW, mapH = mapW * H / W;
+    var mapW = innerW, mapH = mapW * H / W, availMap = ch - safeTop - safeBottom - brandH - headH - chipsH - urlH - gap * 4;
     if (mapH > availMap) { mapH = availMap; mapW = mapH * W / H; }
-    var total = brandH + headH + gap + mapH + gap + chipsH + gap + urlH;
-    var y = safeTop + Math.max(0, (ch - safeTop - safeBottom - total) / 2);
-
-    ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    ctx.fillStyle = v("--brand-link"); ctx.font = "400 " + Math.round(brandH * .8) + "px " + SERIF;
-    ctx.fillText("All Trips Considered", cw / 2, y + brandH / 2);
+    var total = brandH + headH + gap + mapH + gap + chipsH + gap + urlH, y = safeTop + Math.max(0, (ch - safeTop - safeBottom - total) / 2);
+    var L = { w: cw, h: ch, c: c, wide: wide, texts: [], chips: [] };
+    L.texts.push({ t: "All Trips Considered", x: cw / 2, y: y + brandH / 2, font: "400 " + Math.round(brandH * .8) + "px " + SERIF, fill: c.brand, anchor: "middle" });
     y += brandH;
-    ctx.fillStyle = v("--text");
     if (story && been) {
-      // Stories get a two-line headline with the number on its own line, large.
-      var line1 = "I've been to", line2 = fmtNum(been) + (been === 1 ? " country" : " countries");
-      fitFont(ctx, line1, 700, 72, SANS, innerW); ctx.fillText(line1, cw / 2, y + headH * .22);
-      fitFont(ctx, line2, 800, 150, SANS, innerW); ctx.fillText(line2, cw / 2, y + headH * .66);
+      var l1 = "I've been to", l2 = fmtNum(been) + (been === 1 ? " country" : " countries");
+      L.texts.push({ t: l1, x: cw / 2, y: y + headH * .22, font: fitFont(l1, 700, 72, SANS, innerW), fill: c.text, anchor: "middle" });
+      L.texts.push({ t: l2, x: cw / 2, y: y + headH * .66, font: fitFont(l2, 800, 150, SANS, innerW), fill: c.text, anchor: "middle" });
     } else {
-      fitFont(ctx, headline, 800, Math.round(headH * (story ? .4 : .72)), SANS, innerW);
-      ctx.fillText(headline, cw / 2, y + headH / 2);
+      L.texts.push({ t: headline, x: cw / 2, y: y + headH / 2, font: fitFont(headline, 800, Math.round(headH * (story ? .4 : .72)), SANS, innerW), fill: c.text, anchor: "middle" });
     }
     y += headH + gap;
-
-    // Map card with rounded corners and a soft shadow.
-    var mx = (cw - mapW) / 2, r = wide ? 14 : 24, pad = wide ? 8 : 14;
-    ctx.save(); ctx.shadowColor = "rgba(0,0,0,.18)"; ctx.shadowBlur = wide ? 18 : 32; ctx.shadowOffsetY = wide ? 6 : 10;
-    roundRect(ctx, mx, y, mapW, mapH, r); ctx.fillStyle = v("--surface"); ctx.fill(); ctx.restore();
-    ctx.save(); roundRect(ctx, mx, y, mapW, mapH, r); ctx.clip();
-    ctx.fillStyle = v("--sea"); ctx.fillRect(mx, y, mapW, mapH);
-    var k = (mapW - pad * 2) / W; ctx.translate(mx + pad, y + (mapH - H * k) / 2); ctx.scale(k, k);
-    var p = d3.geoPath(projection, ctx);
-    ctx.strokeStyle = v("--surface"); ctx.lineWidth = .6 / k;
-    countries.forEach(function (c) { ctx.beginPath(); p(c); ctx.fillStyle = col[data[c.key] || "none"]; ctx.fill(); ctx.stroke(); });
-    // Only marked small places get a dot, so the map stays clean.
-    markers.forEach(function (m) {
-      var st = data[m.d.key]; if (!st) return;
-      ctx.beginPath(); ctx.arc(m.c[0], m.c[1], 4.5 / k * (wide ? 1.2 : 2), 0, Math.PI * 2);
-      ctx.fillStyle = col[st]; ctx.fill(); ctx.lineWidth = 1.5 / k; ctx.strokeStyle = v("--surface"); ctx.stroke();
-    });
-    ctx.restore();
+    var mx = (cw - mapW) / 2, pad = wide ? 8 : 14, k = (mapW - pad * 2) / W;
+    L.map = { x: mx, y: y, w: mapW, h: mapH, r: wide ? 14 : 24, k: k, ox: mx + pad, oy: y + (mapH - H * k) / 2, shadow: wide ? 18 : 32, drop: wide ? 6 : 10, dotR: 4.5 * (wide ? 1.2 : 2) };
     y += mapH + gap;
-
-    // Status chips.
     var chipW = (innerW - chipGap * (chipCols - 1)) / chipCols, fs = Math.round(chipH * .42);
     items.forEach(function (it, i) {
-      var cx = side + (chipW + chipGap) * (i % chipCols), cy = y + (chipH + chipGap) * Math.floor(i / chipCols);
-      roundRect(ctx, cx, cy, chipW, chipH, chipH / 2); ctx.fillStyle = v("--surface"); ctx.fill();
-      ctx.lineWidth = 2; ctx.strokeStyle = col[it.s]; ctx.stroke();
-      ctx.font = "700 " + fs + "px " + SANS;
-      var dotR = fs * .36, tw = ctx.measureText(it.text).width, start = cx + chipW / 2 - (tw + dotR * 2 + fs * .45) / 2;
-      ctx.beginPath(); ctx.arc(start + dotR, cy + chipH / 2, dotR, 0, Math.PI * 2); ctx.fillStyle = col[it.s]; ctx.fill();
-      ctx.fillStyle = v("--text"); ctx.textAlign = "left"; ctx.fillText(it.text, start + dotR * 2 + fs * .45, cy + chipH / 2);
+      var x = side + (chipW + chipGap) * (i % chipCols), cy = y + (chipH + chipGap) * Math.floor(i / chipCols);
+      measureCtx.font = "700 " + fs + "px " + SANS;
+      var dotR = fs * .36, tw = measureCtx.measureText(it.text).width, start = x + chipW / 2 - (tw + dotR * 2 + fs * .45) / 2;
+      L.chips.push({ x: x, y: cy, w: chipW, h: chipH, color: c[it.s], dotX: start + dotR, dotR: dotR, text: it.text, tx: start + dotR * 2 + fs * .45, ty: cy + chipH / 2, font: "700 " + fs + "px " + SANS });
     });
     y += chipsH + gap;
-
-    ctx.textAlign = "center"; ctx.fillStyle = v("--muted"); ctx.font = "600 " + Math.round(urlH * .62) + "px " + SANS;
-    ctx.fillText("mymaps.alltripsconsidered.com", cw / 2, y + urlH / 2);
-    // A thin band in the status colors along the bottom edge.
-    ctx.fillStyle = accent; ctx.fillRect(0, ch - (wide ? 8 : 14), cw, wide ? 8 : 14);
+    L.texts.push({ t: "mymaps.alltripsconsidered.com", x: cw / 2, y: y + urlH / 2, font: "600 " + Math.round(urlH * .62) + "px " + SANS, fill: c.muted, anchor: "middle" });
+    L.band = wide ? 8 : 14;
+    return L;
+  }
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+  }
+  // Paints a layout onto a canvas. scale > 1 gives a sharper image at the same layout.
+  function paintCanvas(L, scale) {
+    var c = L.c, m = L.map, canvas = document.createElement("canvas");
+    canvas.width = Math.round(L.w * scale); canvas.height = Math.round(L.h * scale);
+    var ctx = canvas.getContext("2d"); ctx.scale(scale, scale);
+    var bg = ctx.createLinearGradient(0, 0, 0, L.h); bg.addColorStop(0, c.bg); bg.addColorStop(1, c.sea);
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, L.w, L.h);
+    ctx.textBaseline = "middle";
+    L.texts.forEach(function (t) { ctx.font = t.font; ctx.fillStyle = t.fill; ctx.textAlign = t.anchor === "middle" ? "center" : "left"; ctx.fillText(t.t, t.x, t.y); });
+    ctx.save(); ctx.shadowColor = "rgba(0,0,0,.18)"; ctx.shadowBlur = m.shadow; ctx.shadowOffsetY = m.drop;
+    roundRect(ctx, m.x, m.y, m.w, m.h, m.r); ctx.fillStyle = c.surface; ctx.fill(); ctx.restore();
+    ctx.save(); roundRect(ctx, m.x, m.y, m.w, m.h, m.r); ctx.clip();
+    ctx.fillStyle = c.sea; ctx.fillRect(m.x, m.y, m.w, m.h);
+    ctx.translate(m.ox, m.oy); ctx.scale(m.k, m.k);
+    var p = d3.geoPath(projection, ctx);
+    ctx.strokeStyle = c.surface; ctx.lineWidth = .6 / m.k;
+    countries.forEach(function (cn) { ctx.beginPath(); p(cn); ctx.fillStyle = c[data[cn.key] || "none"]; ctx.fill(); ctx.stroke(); });
+    markers.forEach(function (mk) {
+      var st = data[mk.d.key]; if (!st) return;
+      ctx.beginPath(); ctx.arc(mk.c[0], mk.c[1], m.dotR / m.k, 0, Math.PI * 2);
+      ctx.fillStyle = c[st]; ctx.fill(); ctx.lineWidth = 1.5 / m.k; ctx.strokeStyle = c.surface; ctx.stroke();
+    });
+    ctx.restore();
+    L.chips.forEach(function (ch) {
+      roundRect(ctx, ch.x, ch.y, ch.w, ch.h, ch.h / 2); ctx.fillStyle = c.surface; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = ch.color; ctx.stroke();
+      ctx.beginPath(); ctx.arc(ch.dotX, ch.ty, ch.dotR, 0, Math.PI * 2); ctx.fillStyle = ch.color; ctx.fill();
+      ctx.font = ch.font; ctx.fillStyle = c.text; ctx.textAlign = "left"; ctx.fillText(ch.text, ch.tx, ch.ty);
+    });
+    var band = ctx.createLinearGradient(0, 0, L.w, 0);
+    ["visited", "planning", "lived", "living"].forEach(function (s, i) { band.addColorStop(i / 3, c[s]); });
+    ctx.fillStyle = band; ctx.fillRect(0, L.h - L.band, L.w, L.band);
+    return canvas;
+  }
+  // The same layout as an SVG file, so it stays sharp at any size.
+  function paintSvg(L) {
+    var c = L.c, m = L.map, sp = d3.geoPath(projection), o = [];
+    function a(t) { return esc(String(t)); }
+    function fontAttrs(f) { var mm = /^(\d+) (\d+)px (.*)$/.exec(f); return 'font-weight="' + mm[1] + '" font-size="' + mm[2] + '" font-family="' + a(mm[3]) + '"'; }
+    o.push('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + L.w + ' ' + L.h + '" width="' + L.w * 2 + '" height="' + L.h * 2 + '">');
+    o.push('<defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + c.bg + '"/><stop offset="1" stop-color="' + c.sea + '"/></linearGradient>' +
+      '<linearGradient id="band"><stop offset="0" stop-color="' + c.visited + '"/><stop offset=".333" stop-color="' + c.planning + '"/><stop offset=".667" stop-color="' + c.lived + '"/><stop offset="1" stop-color="' + c.living + '"/></linearGradient>' +
+      '<clipPath id="mapclip"><rect x="' + m.x + '" y="' + m.y + '" width="' + m.w + '" height="' + m.h + '" rx="' + m.r + '"/></clipPath>' +
+      '<filter id="shadow" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="' + m.drop + '" stdDeviation="' + m.shadow / 2 + '" flood-opacity=".18"/></filter></defs>');
+    o.push('<rect width="100%" height="100%" fill="url(#bg)"/>');
+    L.texts.forEach(function (t) { o.push('<text x="' + t.x + '" y="' + t.y + '" text-anchor="' + t.anchor + '" dominant-baseline="central" ' + fontAttrs(t.font) + ' fill="' + t.fill + '">' + a(t.t) + '</text>'); });
+    o.push('<rect x="' + m.x + '" y="' + m.y + '" width="' + m.w + '" height="' + m.h + '" rx="' + m.r + '" fill="' + c.sea + '" filter="url(#shadow)"/>');
+    o.push('<g clip-path="url(#mapclip)"><g transform="translate(' + m.ox + ',' + m.oy + ') scale(' + m.k + ')" stroke="' + c.surface + '" stroke-width="' + (.6 / m.k) + '">');
+    countries.forEach(function (cn) { o.push('<path fill="' + c[data[cn.key] || "none"] + '" d="' + sp(cn) + '"><title>' + a(fullName(cn)) + '</title></path>'); });
+    markers.forEach(function (mk) { var st = data[mk.d.key]; if (st) o.push('<circle cx="' + mk.c[0] + '" cy="' + mk.c[1] + '" r="' + (m.dotR / m.k) + '" fill="' + c[st] + '" stroke-width="' + (1.5 / m.k) + '"><title>' + a(fullName(mk.d)) + '</title></circle>'); });
+    o.push('</g></g>');
+    L.chips.forEach(function (ch) {
+      o.push('<rect x="' + ch.x + '" y="' + ch.y + '" width="' + ch.w + '" height="' + ch.h + '" rx="' + ch.h / 2 + '" fill="' + c.surface + '" stroke="' + ch.color + '" stroke-width="2"/>');
+      o.push('<circle cx="' + ch.dotX + '" cy="' + ch.ty + '" r="' + ch.dotR + '" fill="' + ch.color + '"/>');
+      o.push('<text x="' + ch.tx + '" y="' + ch.ty + '" dominant-baseline="central" ' + fontAttrs(ch.font) + ' fill="' + c.text + '">' + a(ch.text) + '</text>');
+    });
+    o.push('<rect x="0" y="' + (L.h - L.band) + '" width="' + L.w + '" height="' + L.band + '" fill="url(#band)"/>');
+    o.push('</svg>');
+    return new Blob([o.join("\n")], { type: "image/svg+xml" });
+  }
+  function renderInstagram(size, done) {
+    if (!pathsSel) return;
     // JPEG keeps files small for posting; Instagram converts PNG to JPEG anyway.
-    canvas.toBlob(done, "image/jpeg", .92);
+    paintCanvas(imageLayout(size), 1).toBlob(done, "image/jpeg", .92);
+  }
+  // Download uses the same design as Share, in the wide 1.91:1 shape that suits most screens and posts.
+  var DOWNLOAD = { w: 1080, h: 566, name: "landscape" };
+  function downloadImage(fmt) {
+    if (!pathsSel) return;
+    var L = imageLayout(DOWNLOAD);
+    if (fmt === "svg") { saveBlob(paintSvg(L), "my-maps.svg"); return; }
+    if (fmt === "gif") { makeGif(paintCanvas(L, 1), L.map); return; }
+    var jpg = fmt === "jpg";
+    paintCanvas(L, 2).toBlob(function (b) { saveBlob(b, "my-maps." + fmt); }, jpg ? "image/jpeg" : "image/png", jpg ? 0.92 : undefined);
   }
   function shareInstagram(key) {
     var size = IG[key];
