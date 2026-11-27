@@ -25,8 +25,8 @@ Live site: https://mymaps.alltripsconsidered.com/
 ### Export, download and share
 
 - **Export:** Save your list as CSV, JSON or TXT.
-- **Download:** Save the map as GIF, JPG, PNG or SVG in the same design as the Share images: a headline with the number of countries you have been to, the map, your status counts and the site address, in the wide 1.91:1 shape. PNG and JPG are 2160 × 1132, the GIF and SVG are 1080 × 566 (the SVG scales to any size), and during holidays the GIF plays the holiday decoration over the map.
-- **Share:** Make a social-ready image of your map in Square (1:1, 1080 × 1080), Portrait (4:5, 1080 × 1350), Landscape (1.91:1, 1080 × 566) or Story (9:16, 1080 × 1920). Each image has a headline with the number of countries you have been to, the map, your status counts and the site address, in your color scheme. Story images keep text clear of the top and bottom 250 px that Instagram covers. Images are JPGs, which Instagram and most networks prefer. On phones it opens the share sheet; elsewhere it downloads.
+- **Download:** Save the map as JPG, PNG or SVG in the same design as the Share images: a headline with the number of countries you have been to, the map, your status counts and the site address, in the wide 1.91:1 shape. JPG and PNG are 2160 × 1132; the SVG is 1080 × 566 and scales to any size.
+- **Share:** Make a social-ready image of your map in Square (1:1, 1080 × 1080), Portrait (4:5, 1080 × 1350), Landscape (1.91:1, 1080 × 566) or Story (9:16, 1080 × 1920). Each image has a headline with the number of countries you have been to, the map, your status counts and the site address, in your color scheme. Story images keep text clear of the top and bottom 250 px that Instagram covers. Images are JPGs, which Instagram and most networks prefer. On phones it opens the share sheet; elsewhere it downloads. During a holiday with decorations on, Share makes an 8-second video instead, with the holiday decoration playing over the map (MP4 where the browser supports it, otherwise WebM). On phones a Share button appears when the video is ready.
 
 ### Appearance
 
@@ -82,7 +82,7 @@ docs/assets/tabicon-192.png             Browser tab icon: All Trips Considered a
 docs/favicon.ico                        Favicon: the globe app icon (16, 32 and 48 px)
 docs/assets/og-image.png                Preview image for links shared on social media
 docs/assets/fonts/                      Instrument Serif and its license (OFL.txt)
-docs/vendor/                            D3, TopoJSON Client and gifenc
+docs/vendor/                            D3 and TopoJSON Client
 docs/vendor/licenses/                   Licenses for the vendored libraries
 docs/robots.txt                         Search engine crawl rules
 docs/sitemap.xml                        Page list for search engines
@@ -214,7 +214,6 @@ GitHub Pages publishes the `/docs` folder of the `prod` branch (**Settings > Pag
 - **Libraries:** These are served from `docs/vendor/`, with their licenses in `docs/vendor/licenses/`:
   - [D3](https://d3js.org) 7.9.0 for the map projection and zoom.
   - [TopoJSON Client](https://github.com/topojson/topojson-client) 3.1.0 for reading the map shapes.
-  - [gifenc](https://github.com/mattdesl/gifenc) 1.0.3 for GIF downloads, loaded only when a GIF is requested.
 - **Map data:** Country borders come from [World Atlas](https://github.com/topojson/world-atlas) 2.0.2, and disputed area outlines come from [Natural Earth](https://www.naturalearthdata.com). Both are in the public domain.
 
 <p align="center">

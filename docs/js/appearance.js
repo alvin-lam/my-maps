@@ -128,7 +128,12 @@
       }
     };
   }
-  window.MyMapsDecor = { make: function (W, H) { return makeDecor(resolved(), W, H); }, label: function () { return byId[resolved()]; } };
+  window.MyMapsDecor = {
+    make: function (W, H) { return makeDecor(resolved(), W, H); },
+    label: function () { return byId[resolved()]; },
+    // True when a holiday decoration is showing and the visitor has decorations on.
+    active: function () { return decor === "on" && !reduceMotion && !!DECOR[resolved()]; }
+  };
 
   var decorRun = 0;
   function decorate() {

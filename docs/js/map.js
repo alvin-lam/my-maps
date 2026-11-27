@@ -185,47 +185,50 @@
   }
 
   function esc(t) { return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
-  // Animated GIF: the map image with the current holiday decoration playing over the map area.
-  // The encoder (gifenc) loads only when someone asks for a GIF.
-  var gifBusy = false;
-  function gifToast(text) {
+  // Holiday video: when decorations are on during a holiday, Share records the image with the
+  // decoration playing over the map, using the browser's own recorder. MP4 is used where the
+  // browser can make it (Instagram's preferred format), otherwise WebM.
+  var videoBusy = false;
+  function videoType() {
+    if (!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream) return null;
+    var types = ["video/mp4;codecs=avc1.42E01E", "video/mp4", "video/webm;codecs=vp9", "video/webm"];
+    for (var i = 0; i < types.length; i++) if (MediaRecorder.isTypeSupported(types[i])) return types[i];
+    return null;
+  }
+  function recordVideo(L, done, fail) {
+    var type = videoType(), m = L.map, dec = window.MyMapsDecor && window.MyMapsDecor.make(W, H);
+    if (!type || !dec) { fail(); return; }
+    var base = paintCanvas(L, 1), out = document.createElement("canvas");
+    out.width = base.width; out.height = base.height;
+    var ctx = out.getContext("2d"), stream = out.captureStream(30), chunks = [];
+    var rec = new MediaRecorder(stream, { mimeType: type, videoBitsPerSecond: 6e6 });
+    rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
+    rec.onstop = function () { stream.getTracks().forEach(function (t) { t.stop(); }); done(new Blob(chunks, { type: type.split(";")[0] }), type.indexOf("mp4") > -1 ? "mp4" : "webm"); };
+    var HOLD = 1200, length = dec.duration + HOLD, start = null, last = 0;
+    function frame(now) {
+      if (start === null) { start = last = now; }
+      var t = now - start, dt = Math.min(.05, (now - last) / 1000); last = now;
+      ctx.drawImage(base, 0, 0);
+      if (t < dec.duration) {
+        ctx.save(); roundRect(ctx, m.x, m.y, m.w, m.h, m.r); ctx.clip(); ctx.translate(m.ox, m.oy); ctx.scale(m.k, m.k);
+        dec.step(ctx, t, dt); ctx.restore();
+      }
+      var left = Math.ceil((length - t) / 1000);
+      if (left > 0) videoToast("Making your video… " + left + "s");
+      if (t < length) requestAnimationFrame(frame); else rec.stop();
+    }
+    rec.start(250);
+    requestAnimationFrame(frame);
+  }
+  function videoToast(text, actions) {
     var t = document.getElementById("app-toast"); if (!t) return;
-    t.replaceChildren(); var s = document.createElement("span"); s.textContent = text; t.appendChild(s); t.hidden = !text;
+    t.replaceChildren(); var s = document.createElement("span"); s.textContent = text; t.appendChild(s);
+    (actions || []).forEach(function (a) {
+      var b = document.createElement("button"); b.type = "button"; b.className = a.primary ? "btn btn-primary" : "btn btn-ghost"; b.textContent = a.label;
+      b.addEventListener("click", function () { t.hidden = true; a.run(); }); t.appendChild(b);
+    });
+    t.hidden = !text;
   }
-  function makeGif(base, m) {
-    if (gifBusy) return; gifBusy = true;
-    var dec = window.MyMapsDecor && window.MyMapsDecor.make(W, H);
-    gifToast(dec ? "Making your animated GIF…" : "Making your GIF…");
-    import("../vendor/gifenc-1.0.3.esm.js").then(function (g) {
-      var fw = base.width, fh = base.height, frame = document.createElement("canvas");
-      frame.width = fw; frame.height = fh;
-      var ctx = frame.getContext("2d", { willReadFrequently: true }), enc = g.GIFEncoder();
-      var FPS = 12, delay = Math.round(1000 / FPS), total = dec ? Math.ceil(dec.duration / delay) : 1, i = 0;
-      function addFrame() {
-        ctx.drawImage(base, 0, 0);
-        if (dec) {
-          ctx.save(); roundRect(ctx, m.x, m.y, m.w, m.h, m.r); ctx.clip(); ctx.translate(m.ox, m.oy); ctx.scale(m.k, m.k);
-          dec.step(ctx, i * delay, delay / 1000);
-          ctx.restore();
-        }
-        var rgba = ctx.getImageData(0, 0, fw, fh).data;
-        var palette = g.quantize(rgba, 256, { format: "rgb444" });
-        enc.writeFrame(g.applyPalette(rgba, palette, "rgb444"), fw, fh, { palette: palette, delay: delay, repeat: 0 });
-      }
-      function work() {
-        var until = performance.now() + 40;
-        while (i < total && performance.now() < until) { addFrame(); i++; }
-        if (i < total) { gifToast("Making your animated GIF… " + (window.Intl ? new Intl.NumberFormat(undefined, { style: "percent" }).format(i / total) : Math.round(i / total * 100) + "%")); setTimeout(work, 0); return; }
-        // Hold the last frame (plain map) so the loop pauses before it starts again.
-        if (dec) { ctx.drawImage(base, 0, 0); var rgba = ctx.getImageData(0, 0, fw, fh).data, pal = g.quantize(rgba, 256, { format: "rgb444" }); enc.writeFrame(g.applyPalette(rgba, pal, "rgb444"), fw, fh, { palette: pal, delay: 1500 }); }
-        enc.finish();
-        saveBlob(new Blob([enc.bytes()], { type: "image/gif" }), "my-maps.gif");
-        gifToast(""); gifBusy = false;
-      }
-      work();
-    }).catch(function () { gifToast("Couldn't make the GIF. Check your connection and try again."); gifBusy = false; setTimeout(function () { gifToast(""); }, 4000); });
-  }
-
   // Format menus
   var menus = [];
   function setupMenu(btnId, menuId, run) {
@@ -395,19 +398,39 @@
     if (!pathsSel) return;
     var L = imageLayout(DOWNLOAD);
     if (fmt === "svg") { saveBlob(paintSvg(L), "my-maps.svg"); return; }
-    if (fmt === "gif") { makeGif(paintCanvas(L, 1), L.map); return; }
     var jpg = fmt === "jpg";
     paintCanvas(L, 2).toBlob(function (b) { saveBlob(b, "my-maps." + fmt); }, jpg ? "image/jpeg" : "image/png", jpg ? 0.92 : undefined);
   }
+  // Hands a finished file to the share sheet on phones, or downloads it elsewhere.
+  function deliver(blob, name, label, mime) {
+    var file = window.File ? new File([blob], name, { type: mime }) : null;
+    var saved = function () { saveBlob(blob, name); toast("Saved a " + label + " for Instagram."); };
+    if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+      navigator.share({ files: [file], title: "My Maps" }).catch(function (e) { if (!e || e.name !== "AbortError") saved(); });
+    } else saved();
+  }
   function shareInstagram(key) {
-    var size = IG[key];
+    var size = IG[key], dims = size.w + " × " + size.h;
+    if (window.MyMapsDecor && window.MyMapsDecor.active() && videoType()) {
+      if (videoBusy) return; videoBusy = true;
+      recordVideo(imageLayout(size), function (blob, ext) {
+        videoBusy = false;
+        var name = "my-maps-instagram-" + size.name + "." + ext, mime = blob.type;
+        // Recording takes a few seconds, so the share sheet needs a fresh tap to open.
+        if (window.File && navigator.canShare && navigator.canShare({ files: [new File([blob], name, { type: mime })] })) {
+          videoToast("Your " + dims + " video is ready.", [
+            { label: "Share", primary: true, run: function () { deliver(blob, name, dims + " video", mime); } },
+            { label: "Close", run: function () {} }
+          ]);
+        } else { videoToast(""); deliver(blob, name, dims + " video", mime); }
+      }, function () { videoBusy = false; videoToast(""); shareImage(size); });
+      return;
+    }
+    shareImage(size);
+  }
+  function shareImage(size) {
     renderInstagram(size, function (blob) {
-      var name = "my-maps-instagram-" + size.name + ".jpg";
-      var file = window.File ? new File([blob], name, { type: "image/jpeg" }) : null;
-      var saved = function () { saveBlob(blob, name); toast("Saved a " + size.w + " × " + size.h + " image for Instagram."); };
-      if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
-        navigator.share({ files: [file], title: "My Maps" }).catch(function (e) { if (!e || e.name !== "AbortError") saved(); });
-      } else saved();
+      deliver(blob, "my-maps-instagram-" + size.name + ".jpg", size.w + " × " + size.h + " image", "image/jpeg");
     });
   }
   function share(target) {
