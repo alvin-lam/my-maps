@@ -419,6 +419,7 @@ body.has-install-banner { padding-bottom: var(--install-banner-height, 140px); }
 .app-toast { left: 16px; right: 16px; transform: none; width: fit-content; max-width: min(560px, calc(100% - 32px)); margin-inline: auto; }
 .disclaimer a { color: inherit; text-decoration: underline; }
 .disclaimer a:hover, .disclaimer a:focus-visible { color: var(--text); }
+.disclaimer .copyright a, .disclaimer .copyright a:hover { color: var(--brand-link); text-decoration: none; }
 
 /* Travel Tools: links to other All Trips Considered tools.
    Wider screens: a row of buttons (name, then icon).

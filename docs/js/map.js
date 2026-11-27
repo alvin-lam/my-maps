@@ -304,9 +304,8 @@
   setupMenu("export-list", "export-menu", exportList);
   setupMenu("download-image", "image-menu", function (fmt) { downloadImage(fmt); });
 
-  // Share: Instagram-ready images in Instagram's post and Story shapes, plus Copy link.
+  // Share: Instagram-ready images in Instagram's post and Story shapes.
   // On phones the image opens in the share sheet so it can go straight to Instagram; elsewhere it downloads.
-  var siteUrl = "https://mymaps.alltripsconsidered.com/";
   var IG = {
     "ig-square": { w: 1080, h: 1080, name: "square" },
     "ig-portrait": { w: 1080, h: 1350, name: "portrait" },
@@ -428,12 +427,7 @@
     });
   }
   function share(target) {
-    if (IG[target]) { shareInstagram(target); return; }
-    if (target === "copy") {
-      var done = function () { toast("Link copied."); };
-      if (navigator.clipboard) navigator.clipboard.writeText(siteUrl).then(done, function () { toast(siteUrl); });
-      else toast(siteUrl);
-    }
+    if (IG[target]) shareInstagram(target);
   }
   setupMenu("share-map", "share-menu", share);
   document.addEventListener("click", function () { menus.forEach(function (m) { m(); }); });
