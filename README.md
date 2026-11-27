@@ -26,7 +26,12 @@ Live site: https://mymaps.alltripsconsidered.com/
 
 - **Export:** Save your list as CSV, JSON or TXT.
 - **Download:** Save the map as JPG, PNG or SVG in the same design as the Share images: a headline with the number of countries you have been to, the map, your status counts and the site address, in the wide 1.91:1 shape. JPG and PNG are 2160 × 1132; the SVG is 1080 × 566 and scales to any size.
-- **Share:** Make a social-ready image of your map in Square (1:1, 1080 × 1080), Portrait (4:5, 1080 × 1350), Landscape (1.91:1, 1080 × 566) or Story (9:16, 1080 × 1920). Each image has a headline with the number of countries you have been to, the map, your status counts and the site address, in your color scheme. Story images keep text clear of the top and bottom 250 px that Instagram covers. Images are JPGs, which Instagram and most networks prefer. On phones it opens the share sheet; elsewhere it downloads. During a holiday with decorations on, Share makes an 8-second video instead, with the holiday decoration playing over the map (MP4 where the browser supports it, otherwise WebM). On phones a Share button appears when the video is ready.
+- **Share:** Make an Instagram-ready image of your map.
+  - **Shapes:** Square (1:1, 1080 × 1080), Portrait (4:5, 1080 × 1350), Landscape (1.91:1, 1080 × 566) and Story (9:16, 1080 × 1920).
+  - **Design:** A headline with the number of countries you have been to, the map, your status counts and the site address, in your color scheme. Story images keep text clear of the top and bottom 250 px that Instagram covers.
+  - **Format:** JPG, which Instagram and most networks prefer.
+  - **Holiday video:** During a holiday with decorations on, Share makes an 8-second video instead, with the decoration playing over the map. It is MP4 where the browser supports it, otherwise WebM.
+  - **Delivery:** On phones the file opens in the share sheet; for videos, a Share button appears when the video is ready. Elsewhere it downloads.
 
 ### Appearance
 
@@ -39,7 +44,7 @@ One button opens the Appearance panel.
   - **Classic:** Classic, Daylight (best in light mode) and Midnight (best in dark mode).
   - **Seasons:** Spring, Summer, Autumn and Winter. Seasons follow the hemisphere of the device time zone.
   - **Holidays:** All the holidays above, plus Holi, Día de los Muertos and Hanukkah, which can only be picked by hand.
-- **Holiday decorations:** A short animation plays over the map during holidays, such as falling snow at Christmas or fireworks on New Year's Eve. It can be turned off, and it stays off on devices set to reduce motion.
+- **Holiday decorations:** A short animation plays over the map during holidays, such as falling snow at Christmas or fireworks on New Year's Eve. It can be turned off, and it stays off on devices set to reduce motion. While it is on, Share makes holiday videos.
 
 ### Language and region
 
