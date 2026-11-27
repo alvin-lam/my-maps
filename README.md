@@ -26,7 +26,7 @@ Live site: https://mymaps.alltripsconsidered.com/
 
 - **Export:** Save your list as CSV, JSON or TXT.
 - **Download:** Save the map as GIF, JPG, PNG or SVG. Each image shows the title, the map, the counts and the site address. During holidays the GIF plays the holiday decoration.
-- **Share:** Make an Instagram-ready image of your map in Square (1:1, 1080 × 1080), Portrait (4:5, 1080 × 1350) or Landscape (1.91:1, 1080 × 566). On phones it opens the share sheet so it can go straight to Instagram; elsewhere it downloads. Copy link copies the site address.
+- **Share:** Make an Instagram-ready image of your map in Square (1:1, 1080 × 1080), Portrait (4:5, 1080 × 1350) Landscape (1.91:1, 1080 × 566) or Story or Reel (9:16, 1080 × 1920). On phones it opens the share sheet so it can go straight to Instagram; elsewhere it downloads. Copy link copies the site address.
 
 ### Appearance
 

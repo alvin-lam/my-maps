@@ -304,13 +304,14 @@
   setupMenu("export-list", "export-menu", exportList);
   setupMenu("download-image", "image-menu", function (fmt) { downloadImage(fmt); });
 
-  // Share: Instagram-ready images in Instagram's three post shapes, plus Copy link.
+  // Share: Instagram-ready images in Instagram's post and Story shapes, plus Copy link.
   // On phones the image opens in the share sheet so it can go straight to Instagram; elsewhere it downloads.
   var siteUrl = "https://mymaps.alltripsconsidered.com/";
   var IG = {
     "ig-square": { w: 1080, h: 1080, name: "square" },
     "ig-portrait": { w: 1080, h: 1350, name: "portrait" },
-    "ig-landscape": { w: 1080, h: 566, name: "landscape" }
+    "ig-landscape": { w: 1080, h: 566, name: "landscape" },
+    "ig-story": { w: 1080, h: 1920, name: "story" }
   };
   function toast(text) {
     var t = document.getElementById("app-toast"); if (!t) return;
