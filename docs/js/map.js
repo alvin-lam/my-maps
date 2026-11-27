@@ -205,6 +205,9 @@
     rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
     rec.onstop = function () { stream.getTracks().forEach(function (t) { t.stop(); }); done(new Blob(chunks, { type: type.split(";")[0] }), type.indexOf("mp4") > -1 ? "mp4" : "webm"); };
     var HOLD = 1200, length = dec.duration + HOLD, start = null, last = 0;
+    // The color band along the bottom slides sideways through the four status colors and loops seamlessly.
+    var c = L.c, bandY = L.h - L.band, flow = ctx.createLinearGradient(0, 0, L.w, 0);
+    ["visited", "planning", "lived", "living", "visited"].forEach(function (k, i) { flow.addColorStop(i / 4, c[k]); });
     function frame(now) {
       if (start === null) { start = last = now; }
       var t = now - start, dt = Math.min(.05, (now - last) / 1000); last = now;
@@ -213,6 +216,9 @@
         ctx.save(); roundRect(ctx, m.x, m.y, m.w, m.h, m.r); ctx.clip(); ctx.translate(m.ox, m.oy); ctx.scale(m.k, m.k);
         dec.step(ctx, t, dt); ctx.restore();
       }
+      var shift = (t / 4000 * L.w) % L.w;
+      ctx.fillStyle = flow;
+      [-shift, L.w - shift].forEach(function (x) { ctx.save(); ctx.translate(x, 0); ctx.fillRect(0, bandY, L.w, L.band); ctx.restore(); });
       var left = Math.ceil((length - t) / 1000);
       if (left > 0) videoToast("Making your video… " + left + "s");
       if (t < length) requestAnimationFrame(frame); else rec.stop();

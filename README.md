@@ -30,7 +30,7 @@ Live site: https://mymaps.alltripsconsidered.com/
   - **Shapes:** Square (1:1, 1080 × 1080), Portrait (4:5, 1080 × 1350), Landscape (1.91:1, 1080 × 566) and Story (9:16, 1080 × 1920).
   - **Design:** A headline with the number of countries you have been to, the map, your status counts and the site address, in your color scheme. Story images keep text clear of the top and bottom 250 px that Instagram covers.
   - **Format:** JPG, which Instagram and most networks prefer.
-  - **Holiday video:** During a holiday with decorations on, Share makes an 8-second video instead, with the decoration playing over the map. It is MP4 where the browser supports it, otherwise WebM.
+  - **Holiday video:** During a holiday with decorations on, Share makes an 8-second video instead, with the decoration playing over the map and the color band along the bottom flowing through the status colors. It is MP4 where the browser supports it, otherwise WebM.
   - **Delivery:** On phones the file opens in the share sheet; for videos, a Share button appears when the video is ready. Elsewhere it downloads.
 
 ### Appearance
