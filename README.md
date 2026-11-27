@@ -26,7 +26,7 @@ Live site: https://mymaps.alltripsconsidered.com/
 
 - **Export:** Save your list as CSV, JSON or TXT.
 - **Download:** Save the map as GIF, JPG, PNG or SVG in the same design as the Share images: a headline with the number of countries you have been to, the map, your status counts and the site address, in the wide 1.91:1 shape. PNG and JPG are 2160 × 1132, the GIF and SVG are 1080 × 566 (the SVG scales to any size), and during holidays the GIF plays the holiday decoration over the map.
-- **Share:** Make a social-ready image of your map in Square (1:1, 1080 × 1080), Portrait (4:5, 1080 × 1350), Landscape (1.91:1, 1080 × 566) or Story or Reel (9:16, 1080 × 1920). Each image has a headline with the number of countries you have been to, the map, your status counts and the site address, in your color scheme. Story images keep text clear of the top and bottom 250 px that Instagram covers. Images are JPGs, which Instagram and most networks prefer. On phones it opens the share sheet; elsewhere it downloads.
+- **Share:** Make a social-ready image of your map in Square (1:1, 1080 × 1080), Portrait (4:5, 1080 × 1350), Landscape (1.91:1, 1080 × 566) or Story (9:16, 1080 × 1920). Each image has a headline with the number of countries you have been to, the map, your status counts and the site address, in your color scheme. Story images keep text clear of the top and bottom 250 px that Instagram covers. Images are JPGs, which Instagram and most networks prefer. On phones it opens the share sheet; elsewhere it downloads.
 
 ### Appearance
 
