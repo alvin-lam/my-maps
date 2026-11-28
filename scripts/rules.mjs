@@ -112,6 +112,8 @@ var NATIVE = {
   "x-Crimea": ["Крим"],
   "x-Donetsk": ["Донецьк"],
   "x-Luhansk": ["Луганськ"],
+  "x-Zaporizhzhia": ["Запоріжжя"],
+  "x-Kherson": ["Херсон"],
   "x-Golan Heights": ["الجولان"],
   "x-Abkhazia": ["აფხაზეთი"],
   "x-South Ossetia": ["სამხრეთ ოსეთი"],
