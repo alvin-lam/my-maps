@@ -560,8 +560,12 @@
     if (!q) { list.hidden = true; input.setAttribute("aria-expanded", "false"); return; }
     matches = countries.filter(function (c) { var k = codes(c); return norm(c.properties.name).indexOf(q) !== -1 || c.properties.a.concat(c.properties.l).some(function (n) { return norm(n).indexOf(q) !== -1; }) || (k && (norm(k.a2) === q || norm(k.a3) === q)); })
       .sort(function (a, b) { return rank(a) - rank(b); }).slice(0, 8);
-    // Exact code matches first, then names that start with the text, then the rest.
-    function rank(c) { var k = codes(c); if (k && (norm(k.a2) === q || norm(k.a3) === q)) return 0; return norm(c.properties.name).indexOf(q) === 0 || c.properties.l.some(function (n) { return norm(n).indexOf(q) === 0; }) ? 1 : 2; }
+    // Exact matches of a code or another name first, then names that start with the text, then the rest.
+    function rank(c) {
+      var k = codes(c); if (k && (norm(k.a2) === q || norm(k.a3) === q)) return 0;
+      if (c.properties.a.concat(c.properties.l).some(function (n) { return norm(n) === q; })) return 0;
+      return norm(c.properties.name).indexOf(q) === 0 || c.properties.l.some(function (n) { return norm(n).indexOf(q) === 0; }) ? 1 : 2;
+    }
     active = matches.length ? 0 : -1;
     list.replaceChildren();
     if (!matches.length) { var li = document.createElement("li"); li.className = "empty"; li.textContent = "No matching country"; list.appendChild(li); }

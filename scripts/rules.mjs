@@ -74,8 +74,8 @@ var TINY = [
 // Other names people search for, keyed by saved key. Former and common names stay findable after a rename.
 var ALIAS = {
   "104": ["Burma"], "132": ["Cape Verde"], "203": ["Czech Republic"], "336": ["Holy See"], "384": ["Ivory Coast"],
-  "520": ["Naoero"], "581": ["United States Minor Outlying Islands"], "626": ["East Timor"], "748": ["Swaziland"],
-  "792": ["Turkey"], "807": ["Macedonia"], "850": ["United States Virgin Islands"]
+  "520": ["Naoero"], "581": ["United States Minor Outlying Islands", "USA"], "626": ["East Timor"], "748": ["Swaziland"],
+  "792": ["Turkey"], "807": ["Macedonia"], "850": ["United States Virgin Islands", "USA"], "840": ["America"]
 };
 
 // Notes for places that are disputed but come from the map data rather than scripts/source/disputed.json.
