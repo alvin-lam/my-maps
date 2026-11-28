@@ -40,7 +40,7 @@ One button opens the Appearance panel.
 - **Mode:** System, Light or Dark. System follows the device.
 - **Map style:** Flat, Outline (a tinted fill with a bold border) or Vintage (parchment tones).
 - **Color scheme:**
-  - **Automatic** is the default. It follows the seasons and these holidays: New Year's Eve, Lunar New Year, Valentine's Day, St. Patrick's Day, Earth Day, Pride, Independence Day, Halloween, Diwali, Thanksgiving and Christmas.
+  - **Automatic** is the default. It follows the seasons and these holidays: New Year's Eve, Lunar New Year, Valentine's Day, St. Patrick's Day, Earth Day, Pride, Independence Day, Halloween, Diwali, Thanksgiving and Christmas. When two holidays overlap, the one whose own date is closer wins, so Valentine's Day always has February 14 and Halloween always has October 31.
   - **Classic:** Classic, Daylight (best in light mode) and Midnight (best in dark mode).
   - **Seasons:** Spring, Summer, Autumn and Winter. Seasons follow the hemisphere of the device time zone.
   - **Holidays:** All the holidays above, plus Holi, Día de los Muertos and Hanukkah, which can only be picked by hand.

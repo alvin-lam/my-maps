@@ -34,14 +34,21 @@
     d = new Date(d.getFullYear(), d.getMonth(), d.getDate());
     var y = d.getFullYear(), m = d.getMonth(), day = d.getDate();
     if ((m === 11 && day >= 27) || (m === 0 && day <= 2)) return "new-years-eve";
-    if (near(d, y, LUNAR[y], 7, 15)) return "lunar-new-year";
-    if (near(d, y, DIWALI[y], 2, 2)) return "diwali";
+    // Holidays that can overlap: on a shared day, the one whose own date is closer wins (the first listed on a tie).
+    var shared = [
+      ["lunar-new-year", LUNAR[y], near(d, y, LUNAR[y], 7, 15)],
+      ["valentines-day", [1, 14], m === 1 && day >= 7 && day <= 14],
+      ["diwali", DIWALI[y], near(d, y, DIWALI[y], 2, 2)],
+      ["halloween", [9, 31], m === 9 && day >= 15]
+    ].filter(function (h) { return h[2]; });
+    if (shared.length) {
+      var gap = function (h) { return Math.abs(Math.round((d - new Date(y, h[1][0], h[1][1])) / 864e5)); };
+      return shared.reduce(function (a, b) { return gap(b) < gap(a) ? b : a; })[0];
+    }
     if (near(d, y, thanksgiving(y), 3, 3)) return "thanksgiving";
-    if (m === 1 && day >= 7 && day <= 14) return "valentines-day";
     if (m === 2 && day >= 10 && day <= 17) return "st-patricks-day";
     if (m === 3 && day >= 15 && day <= 22) return "earth-day";
     if (m === 11 && day <= 26) return "christmas";
-    if (m === 9 && day >= 15) return "halloween";
     if ((m === 5 && day >= 28) || (m === 6 && day <= 5)) return "independence-day";
     if (m === 5) return "pride";
     // Seasons flip for the southern hemisphere; holidays stay on their dates.

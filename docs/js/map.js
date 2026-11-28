@@ -3,6 +3,8 @@
   var KEY = "world-map-statuses";
   var STATUSES = ["visited", "planning", "lived", "living"];
   var LABEL = { visited: "Visited", planning: "Planning", lived: "Lived", living: "Living" };
+  // Keys that were split into new places. A mark saved on the old key moves to each new key that has none.
+  var MOVED = { "x-Indian Ocean Ter.": ["162", "166"] };
   var data = load();
   var countries = [], byId = {}, selectedId = null;
   // A colored status dot. Built with DOM calls (no HTML strings), as the Content Security Policy requires.
@@ -27,19 +29,39 @@
     return f;
   }
   var svg = d3.select("#map"), wrap = document.getElementById("map-wrap");
-  var g = svg.append("g"), pathsSel, markers = [], MARKER_R = 3;
+  var g = svg.append("g"), pathsSel, markers = [];
   var tip = document.createElement("div"); tip.className = "map-tip"; tip.hidden = true; document.body.appendChild(tip);
 
-  function load() { try { var v = JSON.parse(localStorage.getItem(KEY)); return v && typeof v === "object" ? v : {}; } catch (e) { return {}; } }
+  function load() {
+    var v;
+    try { v = JSON.parse(localStorage.getItem(KEY)); } catch (e) { return {}; }
+    if (!v || typeof v !== "object" || Array.isArray(v)) return {};
+    var moved = false;
+    Object.keys(MOVED).forEach(function (old) {
+      if (!(old in v)) return;
+      MOVED[old].forEach(function (k) { if (!v[k]) v[k] = v[old]; });
+      delete v[old]; moved = true;
+    });
+    if (moved) { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch (e) {} }
+    return v;
+  }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {} }
+  // Read the latest saved map before each change, so a change made in another tab or window is kept.
+  function change(fn) { data = load(); fn(); save(); render(); }
+  window.addEventListener("storage", function (e) { if (e.key === KEY || e.key === null) { data = load(); render(); } });
 
-  var zoom = d3.zoom().scaleExtent([1, 12]).on("zoom", function (e) {
+  var W = 960, H = 505;
+  // Keep marker dots the same size on screen at every zoom level, and large enough to tap on phones.
+  function markerR(k) {
+    var w = svg.node().getBoundingClientRect().width || W, px = w < 600 ? 4.5 : 3;
+    return px * (W / w) / k;
+  }
+  var zoom = d3.zoom().scaleExtent([1, 12]).translateExtent([[0, 0], [W, H]]).extent([[0, 0], [W, H]]).on("zoom", function (e) {
     g.attr("transform", e.transform);
-    // Keep marker dots the same size on screen at every zoom level.
-    g.selectAll("circle.marker").attr("r", MARKER_R / e.transform.k);
+    g.selectAll("circle.marker").attr("r", markerR(e.transform.k));
   });
   svg.call(zoom).on("dblclick.zoom", null);
-  var W = 960, H = 505;
+  window.addEventListener("resize", function () { g.selectAll("circle.marker").attr("r", markerR(d3.zoomTransform(svg.node()).k)); });
   svg.attr("viewBox", "0 0 " + W + " " + H).attr("preserveAspectRatio", "xMidYMid meet");
   var projection = d3.geoNaturalEarth1();
   var path = d3.geoPath(projection);
@@ -63,20 +85,31 @@
       .attr("d", path).attr("tabindex", 0)
       .attr("role", "button").attr("aria-label", function (d) { return d.properties.name; });
     // Places too small to see or tap get a dot on top of them.
-    markers = fc.features.filter(function (d) { return path.area(d) < 8; }).map(function (d) { return { d: d, c: path.centroid(d) }; })
+    markers = fc.features.filter(function (d) { return path.area(d) < 8; }).map(function (d) {
+        // A place that crosses the 180° line spans the whole map, so its flat center lands in the wrong ocean.
+        var b = path.bounds(d), c = b[1][0] - b[0][0] > W / 2 ? projection(d3.geoCentroid(d)) : path.centroid(d);
+        return { d: d, c: c };
+      })
       .filter(function (m) { return isFinite(m.c[0]) && isFinite(m.c[1]); });
     g.selectAll("circle.marker").data(markers.map(function (m) { return m.d; })).join("circle")
-      .attr("aria-hidden", "true").attr("r", MARKER_R)
+      .attr("aria-hidden", "true").attr("r", markerR(1))
       .attr("cx", function (d, i) { return markers[i].c[0]; }).attr("cy", function (d, i) { return markers[i].c[1]; });
     pathsSel = g.selectAll("path, circle")
       .on("click", function (e, d) { select(d.key, false); })
       .on("keydown", function (e, d) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(d.key, false); } })
-      .on("mousemove", function (e, d) { tip.textContent = fullName(d) + (data[d.key] ? " · " + LABEL[data[d.key]] : "") + (d.properties.note ? " · " + d.properties.note : ""); tip.hidden = false; tip.style.left = (e.clientX + 12) + "px"; tip.style.top = (e.clientY + 12) + "px"; })
+      .on("mousemove", function (e, d) { tip.textContent = fullName(d) + (data[d.key] ? " · " + LABEL[data[d.key]] : "") + (d.properties.note ? " · " + d.properties.note : ""); tip.hidden = false; placeTip(e); })
       .on("mouseleave", function () { tip.hidden = true; });
     document.getElementById("map-loading").hidden = true;
     render();
   }).catch(function () { document.getElementById("map-loading").textContent = "Couldn't load the map. Check your connection and refresh."; });
 
+  // Keep the tooltip inside the window: flip it to the left of the pointer near the right edge.
+  function placeTip(e) {
+    var w = tip.offsetWidth, h = tip.offsetHeight, vw = document.documentElement.clientWidth, vh = window.innerHeight;
+    var x = e.clientX + 12 + w > vw - 8 ? e.clientX - 12 - w : e.clientX + 12;
+    var y = e.clientY + 12 + h > vh - 8 ? e.clientY - 12 - h : e.clientY + 12;
+    tip.style.left = Math.max(8, x) + "px"; tip.style.top = Math.max(8, y) + "px";
+  }
   function render() {
     if (pathsSel) pathsSel.attr("class", function (d) { return "country" + (this.tagName === "circle" ? " marker" : "") + (data[d.key] ? " " + data[d.key] : "") + (d.key === selectedId ? " selected" : ""); });
     STATUSES.forEach(function (s) {
@@ -119,14 +152,14 @@
   document.querySelectorAll(".status-btn").forEach(function (b) {
     b.addEventListener("click", function () {
       if (!selectedId) return;
-      if (data[selectedId] === b.dataset.status) delete data[selectedId]; else data[selectedId] = b.dataset.status;
-      save(); render();
+      var id = selectedId, s = b.dataset.status;
+      change(function () { if (data[id] === s) delete data[id]; else data[id] = s; });
     });
   });
-  document.getElementById("chooser-clear").addEventListener("click", function () { if (selectedId) { delete data[selectedId]; save(); render(); } });
+  document.getElementById("chooser-clear").addEventListener("click", function () { if (selectedId) { var id = selectedId; change(function () { delete data[id]; }); } });
   document.getElementById("reset-all").addEventListener("click", function () {
     if (!Object.keys(data).length || !confirm("Clear all countries from your map?")) return;
-    data = {}; save(); render();
+    change(function () { data = {}; });
   });
   document.getElementById("zoom-in").addEventListener("click", function () { svg.transition().call(zoom.scaleBy, 1.6); });
   document.getElementById("zoom-out").addEventListener("click", function () { svg.transition().call(zoom.scaleBy, 1 / 1.6); });
@@ -452,7 +485,9 @@
     var q = norm(input.value.trim());
     if (!q) { list.hidden = true; input.setAttribute("aria-expanded", "false"); return; }
     matches = countries.filter(function (c) { var k = codes(c); return norm(c.properties.name).indexOf(q) !== -1 || (k && (norm(k.a2) === q || norm(k.a3) === q)); })
-      .sort(function (a, b) { return (norm(a.properties.name).indexOf(q) === 0 ? 0 : 1) - (norm(b.properties.name).indexOf(q) === 0 ? 0 : 1); }).slice(0, 8);
+      .sort(function (a, b) { return rank(a) - rank(b); }).slice(0, 8);
+    // Exact code matches first, then names that start with the text, then the rest.
+    function rank(c) { var k = codes(c); if (k && (norm(k.a2) === q || norm(k.a3) === q)) return 0; return norm(c.properties.name).indexOf(q) === 0 ? 1 : 2; }
     active = matches.length ? 0 : -1;
     list.replaceChildren();
     if (!matches.length) { var li = document.createElement("li"); li.className = "empty"; li.textContent = "No matching country"; list.appendChild(li); }
