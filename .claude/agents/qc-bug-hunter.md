@@ -99,9 +99,9 @@ Compare `places.json` and `scripts/rules.mjs` with current sources:
   Flag retired, reassigned or missing codes.
 - **Names**: the short English name each place uses at the UN or in
   ISO 3166, and any recent renaming.
-- **Flags**: each emoji flag matches the code, and a place without its own
-  flag shows the flag of the country that governs it, not a broken
-  character.
+- **Flags**: each emoji flag matches the code. Places with no flag (such
+  as Somaliland and Aksai Chin) must follow the UN position the README
+  describes, and must not show a broken character.
 - **Territories and tiny places**: each listed territory still has that
   status, and no new place is missing.
 - **Disputed areas**: each note on who administers and who claims the area
