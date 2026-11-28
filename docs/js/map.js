@@ -552,7 +552,8 @@
 
   // Search
   var input = document.getElementById("country-search"), list = document.getElementById("search-results"), active = -1, matches = [];
-  function norm(s) { return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase(); }
+  // Accents and periods are ignored, so "curacao" finds Curaçao and "U.S." finds "US".
+  function norm(s) { return s.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/\./g, "").toLowerCase(); }
   function showResults() {
     // "St" and "St." also match "Saint", as in St Kitts or St. Lucia.
     var q = norm(input.value.trim()).replace(/(^|\s)st\.?(\s|$)/g, "$1saint$2").trim();
