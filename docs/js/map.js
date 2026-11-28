@@ -3,6 +3,8 @@
   var KEY = "world-map-statuses";
   var STATUSES = ["visited", "planning", "lived", "living"];
   var LABEL = { visited: "Visited", planning: "Planning", lived: "Lived", living: "Living" };
+  // Keys that were split into new places or merged into another. A mark saved on the old key moves to each new key that has none.
+  var MOVED = { "x-Indian Ocean Ter.": ["162", "166"], "x-Ashmore and Cartier Is.": ["036"] };
   var data = load();
   var countries = [], byId = {}, selectedId = null;
   // A colored status dot. Built with DOM calls (no HTML strings), as the Content Security Policy requires.
@@ -27,19 +29,60 @@
     return f;
   }
   var svg = d3.select("#map"), wrap = document.getElementById("map-wrap");
-  var g = svg.append("g"), pathsSel, markers = [], MARKER_R = 3;
+  var g = svg.append("g"), pathsSel, markers = [];
   var tip = document.createElement("div"); tip.className = "map-tip"; tip.hidden = true; document.body.appendChild(tip);
 
-  function load() { try { var v = JSON.parse(localStorage.getItem(KEY)); return v && typeof v === "object" ? v : {}; } catch (e) { return {}; } }
-  function save() { try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {} }
+  function load() {
+    var v;
+    try { v = JSON.parse(localStorage.getItem(KEY)); } catch (e) { return {}; }
+    if (!v || typeof v !== "object" || Array.isArray(v)) return {};
+    // Keep only known statuses, so a damaged or hand-edited value never shows as "undefined".
+    Object.keys(v).forEach(function (k) { if (STATUSES.indexOf(v[k]) === -1) delete v[k]; });
+    var moved = false;
+    Object.keys(MOVED).forEach(function (old) {
+      if (!(old in v)) return;
+      MOVED[old].forEach(function (k) { if (!v[k]) v[k] = v[old]; });
+      delete v[old]; moved = true;
+    });
+    if (moved) { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch (e) {} }
+    return v;
+  }
+  var warnedSave = false;
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(data)); }
+    catch (e) {
+      if (warnedSave) return; warnedSave = true;
+      var t = document.getElementById("app-toast"); if (!t) return;
+      var s = document.createElement("span");
+      s.textContent = "This change couldn't be saved. Your browser's storage may be full or turned off, so the map will reset when you close it.";
+      t.replaceChildren(s); t.hidden = false;
+      setTimeout(function () { t.hidden = true; }, 8000);
+    }
+  }
+  // Read the latest saved map before each change, so a change made in another tab or window is kept.
+  function change(fn) { data = load(); fn(); save(); render(); }
+  window.addEventListener("storage", function (e) { if (e.key === KEY || e.key === null) { data = load(); render(); } });
 
-  var zoom = d3.zoom().scaleExtent([1, 12]).on("zoom", function (e) {
+  var W = 960, H = 505;
+  // Keep marker dots the same size on screen at every zoom level, and large enough to tap on phones.
+  function markerR(k) {
+    var w = svg.node().getBoundingClientRect().width || W, px = w < 600 ? 4.5 : 3;
+    return px * (W / w) / k;
+  }
+  // On phones, one finger scrolls the page while the map is at its normal size; two fingers zoom it.
+  // Once it is zoomed in, one finger moves the map.
+  var zoom = d3.zoom().scaleExtent([1, 12]).translateExtent([[0, 0], [W, H]]).extent([[0, 0], [W, H]])
+    .filter(function (e) {
+      if (e.type === "touchstart" && e.touches.length < 2 && d3.zoomTransform(svg.node()).k <= 1) return false;
+      return (!e.ctrlKey || e.type === "wheel") && !e.button;
+    })
+    .on("zoom", function (e) {
     g.attr("transform", e.transform);
-    // Keep marker dots the same size on screen at every zoom level.
-    g.selectAll("circle.marker").attr("r", MARKER_R / e.transform.k);
+    wrap.classList.toggle("zoomed", e.transform.k > 1);
+    g.selectAll("circle.marker").attr("r", markerR(e.transform.k));
   });
   svg.call(zoom).on("dblclick.zoom", null);
-  var W = 960, H = 505;
+  window.addEventListener("resize", function () { g.selectAll("circle.marker").attr("r", markerR(d3.zoomTransform(svg.node()).k)); });
   svg.attr("viewBox", "0 0 " + W + " " + H).attr("preserveAspectRatio", "xMidYMid meet");
   var projection = d3.geoNaturalEarth1();
   var path = d3.geoPath(projection);
@@ -53,7 +96,7 @@
     fc.features.forEach(function (f) {
       var p = info[f.id] || { n: f.id };
       f.key = f.id;
-      f.properties = { name: p.n, c2: p.c2, c3: p.c3, f: p.f, note: p.note, tiny: p.tiny };
+      f.properties = { name: p.n, c2: p.c2, c3: p.c3, f: p.f, note: p.note, tiny: p.tiny, a: p.a || [], l: p.l || [] };
       rewind(f);
       byId[f.key] = f;
     });
@@ -63,20 +106,31 @@
       .attr("d", path).attr("tabindex", 0)
       .attr("role", "button").attr("aria-label", function (d) { return d.properties.name; });
     // Places too small to see or tap get a dot on top of them.
-    markers = fc.features.filter(function (d) { return path.area(d) < 8; }).map(function (d) { return { d: d, c: path.centroid(d) }; })
+    markers = fc.features.filter(function (d) { return path.area(d) < 8; }).map(function (d) {
+        // A place that crosses the 180° line spans the whole map, so its flat center lands in the wrong ocean.
+        var b = path.bounds(d), c = b[1][0] - b[0][0] > W / 2 ? projection(d3.geoCentroid(d)) : path.centroid(d);
+        return { d: d, c: c };
+      })
       .filter(function (m) { return isFinite(m.c[0]) && isFinite(m.c[1]); });
     g.selectAll("circle.marker").data(markers.map(function (m) { return m.d; })).join("circle")
-      .attr("aria-hidden", "true").attr("r", MARKER_R)
+      .attr("aria-hidden", "true").attr("r", markerR(1))
       .attr("cx", function (d, i) { return markers[i].c[0]; }).attr("cy", function (d, i) { return markers[i].c[1]; });
     pathsSel = g.selectAll("path, circle")
       .on("click", function (e, d) { select(d.key, false); })
       .on("keydown", function (e, d) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(d.key, false); } })
-      .on("mousemove", function (e, d) { tip.textContent = fullName(d) + (data[d.key] ? " · " + LABEL[data[d.key]] : "") + (d.properties.note ? " · " + d.properties.note : ""); tip.hidden = false; tip.style.left = (e.clientX + 12) + "px"; tip.style.top = (e.clientY + 12) + "px"; })
+      .on("mousemove", function (e, d) { tip.textContent = fullName(d) + (data[d.key] ? " · " + LABEL[data[d.key]] : "") + (d.properties.note ? " · " + d.properties.note : ""); tip.hidden = false; placeTip(e); })
       .on("mouseleave", function () { tip.hidden = true; });
     document.getElementById("map-loading").hidden = true;
     render();
   }).catch(function () { document.getElementById("map-loading").textContent = "Couldn't load the map. Check your connection and refresh."; });
 
+  // Keep the tooltip inside the window: flip it to the left of the pointer near the right edge.
+  function placeTip(e) {
+    var w = tip.offsetWidth, h = tip.offsetHeight, vw = document.documentElement.clientWidth, vh = window.innerHeight;
+    var x = e.clientX + 12 + w > vw - 8 ? e.clientX - 12 - w : e.clientX + 12;
+    var y = e.clientY + 12 + h > vh - 8 ? e.clientY - 12 - h : e.clientY + 12;
+    tip.style.left = Math.max(8, x) + "px"; tip.style.top = Math.max(8, y) + "px";
+  }
   function render() {
     if (pathsSel) pathsSel.attr("class", function (d) { return "country" + (this.tagName === "circle" ? " marker" : "") + (data[d.key] ? " " + data[d.key] : "") + (d.key === selectedId ? " selected" : ""); });
     STATUSES.forEach(function (s) {
@@ -116,17 +170,28 @@
   }
   function closeChooser() { selectedId = null; chooser.hidden = true; render(); }
   document.getElementById("chooser-close").addEventListener("click", closeChooser);
+  // Escape closes the chooser, as it closes the other panels. The search box uses Escape for its own list.
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Escape" || chooser.hidden || e.target.id === "country-search") return;
+    var panel = document.getElementById("appearance-panel"); if (panel && !panel.hidden) return;
+    if (document.querySelector(".dl-menu:not([hidden])")) return;
+    closeChooser();
+  });
   document.querySelectorAll(".status-btn").forEach(function (b) {
+    var last = 0;
     b.addEventListener("click", function () {
       if (!selectedId) return;
-      if (data[selectedId] === b.dataset.status) delete data[selectedId]; else data[selectedId] = b.dataset.status;
-      save(); render();
+      // A double click or double tap counts once, so it never turns the status on and straight off again.
+      var now = Date.now(); if (now - last < 400) return; last = now;
+      var id = selectedId, s = b.dataset.status;
+      change(function () { if (data[id] === s) delete data[id]; else data[id] = s; });
     });
   });
-  document.getElementById("chooser-clear").addEventListener("click", function () { if (selectedId) { delete data[selectedId]; save(); render(); } });
+  document.getElementById("chooser-clear").addEventListener("click", function () { if (selectedId) { var id = selectedId; change(function () { delete data[id]; }); } });
   document.getElementById("reset-all").addEventListener("click", function () {
-    if (!Object.keys(data).length || !confirm("Clear all countries from your map?")) return;
-    data = {}; save(); render();
+    if (!Object.keys(data).length) return;
+    if (Object.keys(data).some(function (k) { return byId[k]; }) && !confirm("Clear all countries from your map?")) return;
+    change(function () { data = {}; });
   });
   document.getElementById("zoom-in").addEventListener("click", function () { svg.transition().call(zoom.scaleBy, 1.6); });
   document.getElementById("zoom-out").addEventListener("click", function () { svg.transition().call(zoom.scaleBy, 1 / 1.6); });
@@ -195,6 +260,30 @@
     for (var i = 0; i < types.length; i++) if (MediaRecorder.isTypeSupported(types[i])) return types[i];
     return null;
   }
+  // The browser's WebM recorder leaves out the video's length, so players cannot show it or seek.
+  // Add a Duration element (in milliseconds) to the file's Info section. Any surprise leaves the file as it was.
+  function webmDuration(u, ms) {
+    function find(id, from, to) {
+      for (var i = from; i < to - id.length; i++) { var ok = true; for (var j = 0; j < id.length; j++) if (u[i + j] !== id[j]) { ok = false; break; } if (ok) return i; }
+      return -1;
+    }
+    function vint(p) { var len = 1, mask = 0x80; while (len <= 8 && !(u[p] & mask)) { len++; mask >>= 1; } var v = u[p] & (mask - 1); for (var i = 1; i < len; i++) v = v * 256 + u[p + i]; return { len: len, v: v, unknown: v === Math.pow(2, 7 * len) - 1 }; }
+    try {
+      var info = find([0x15, 0x49, 0xA9, 0x66], 0, Math.min(u.length, 4096)); if (info < 0) return u;
+      var sz = vint(info + 4); if (sz.unknown) return u;
+      var start = info + 4 + sz.len, end = start + sz.v;
+      if (find([0x44, 0x89], start, end) > -1) return u;
+      var add = new Uint8Array(11); add.set([0x44, 0x89, 0x88]); new DataView(add.buffer).setFloat64(3, ms);
+      var nv = sz.v + 11; if (nv >= Math.pow(2, 7 * sz.len) - 1) return u;
+      var out = new Uint8Array(u.length + 11);
+      out.set(u.subarray(0, end)); out.set(add, end); out.set(u.subarray(end), end + 11);
+      for (var i = sz.len - 1, x = nv; i >= 0; i--) { out[info + 4 + i] = x % 256; x = Math.floor(x / 256); }
+      out[info + 4] |= 0x80 >> (sz.len - 1);
+      var seg = find([0x18, 0x53, 0x80, 0x67], 0, info);
+      if (seg > -1) { var ss = vint(seg + 4); if (!ss.unknown) { var sv = ss.v + 11; for (var k = ss.len - 1; k >= 0; k--) { out[seg + 4 + k] = sv % 256; sv = Math.floor(sv / 256); } out[seg + 4] |= 0x80 >> (ss.len - 1); } }
+      return out;
+    } catch (e) { return u; }
+  }
   function recordVideo(L, done, fail) {
     var type = videoType(), m = L.map, dec = window.MyMapsDecor && window.MyMapsDecor.make(W, H);
     if (!type || !dec) { fail(); return; }
@@ -203,7 +292,13 @@
     var ctx = out.getContext("2d"), stream = out.captureStream(30), chunks = [];
     var rec = new MediaRecorder(stream, { mimeType: type, videoBitsPerSecond: 6e6 });
     rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
-    rec.onstop = function () { stream.getTracks().forEach(function (t) { t.stop(); }); done(new Blob(chunks, { type: type.split(";")[0] }), type.indexOf("mp4") > -1 ? "mp4" : "webm"); };
+    rec.onstop = function () {
+      stream.getTracks().forEach(function (t) { t.stop(); });
+      var blob = new Blob(chunks, { type: type.split(";")[0] });
+      if (type.indexOf("mp4") > -1) { done(blob, "mp4"); return; }
+      blob.arrayBuffer().then(function (b) { done(new Blob([webmDuration(new Uint8Array(b), length)], { type: blob.type }), "webm"); })
+        .catch(function () { done(blob, "webm"); });
+    };
     var HOLD = 1200, length = dec.duration + HOLD, start = null, last = 0;
     // The color band along the bottom slides sideways through the four status colors and loops seamlessly.
     var c = L.c, bandY = L.h - L.band, flow = ctx.createLinearGradient(0, 0, L.w, 0);
@@ -367,13 +462,23 @@
     ctx.fillStyle = band; ctx.fillRect(0, L.h - L.band, L.w, L.band);
     return canvas;
   }
+  // The SVG carries its own copy of the title font, so it looks the same when opened outside the site.
+  var svgFont = "";
+  Promise.all(["latin", "latin-ext"].map(function (n) {
+    return fetch("assets/fonts/instrument-serif-v5-" + n + ".woff2").then(function (r) { if (!r.ok) throw r; return r.arrayBuffer(); });
+  })).then(function (bufs) {
+    svgFont = "<style>" + bufs.map(function (b) {
+      var bin = "", u = new Uint8Array(b); for (var i = 0; i < u.length; i += 8192) bin += String.fromCharCode.apply(null, u.subarray(i, i + 8192));
+      return '@font-face{font-family:"Instrument Serif";src:url(data:font/woff2;base64,' + btoa(bin) + ') format("woff2")}';
+    }).join("") + "</style>";
+  }).catch(function () {});
   // The same layout as an SVG file, so it stays sharp at any size.
   function paintSvg(L) {
     var c = L.c, m = L.map, sp = d3.geoPath(projection), o = [];
     function a(t) { return esc(String(t)); }
     function fontAttrs(f) { var mm = /^(\d+) (\d+)px (.*)$/.exec(f); return 'font-weight="' + mm[1] + '" font-size="' + mm[2] + '" font-family="' + a(mm[3]) + '"'; }
     o.push('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + L.w + ' ' + L.h + '" width="' + L.w * 2 + '" height="' + L.h * 2 + '">');
-    o.push('<defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + c.bg + '"/><stop offset="1" stop-color="' + c.sea + '"/></linearGradient>' +
+    o.push('<defs>' + svgFont + '<linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + c.bg + '"/><stop offset="1" stop-color="' + c.sea + '"/></linearGradient>' +
       '<linearGradient id="band"><stop offset="0" stop-color="' + c.visited + '"/><stop offset=".333" stop-color="' + c.planning + '"/><stop offset=".667" stop-color="' + c.lived + '"/><stop offset="1" stop-color="' + c.living + '"/></linearGradient>' +
       '<clipPath id="mapclip"><rect x="' + m.x + '" y="' + m.y + '" width="' + m.w + '" height="' + m.h + '" rx="' + m.r + '"/></clipPath>' +
       '<filter id="shadow" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="' + m.drop + '" stdDeviation="' + m.shadow / 2 + '" flood-opacity=".18"/></filter></defs>');
@@ -447,19 +552,37 @@
 
   // Search
   var input = document.getElementById("country-search"), list = document.getElementById("search-results"), active = -1, matches = [];
-  function norm(s) { return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase(); }
+  // Accents and periods are ignored, so "curacao" finds Curaçao and "U.S." finds "US".
+  function norm(s) { return s.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/\./g, "").toLowerCase(); }
   function showResults() {
-    var q = norm(input.value.trim());
+    // "St" and "St." also match "Saint", as in St Kitts or St. Lucia.
+    var q = norm(input.value.trim()).replace(/(^|\s)st\.?(\s|$)/g, "$1saint$2").trim();
     if (!q) { list.hidden = true; input.setAttribute("aria-expanded", "false"); return; }
-    matches = countries.filter(function (c) { var k = codes(c); return norm(c.properties.name).indexOf(q) !== -1 || (k && (norm(k.a2) === q || norm(k.a3) === q)); })
-      .sort(function (a, b) { return (norm(a.properties.name).indexOf(q) === 0 ? 0 : 1) - (norm(b.properties.name).indexOf(q) === 0 ? 0 : 1); }).slice(0, 8);
+    matches = countries.filter(function (c) { var k = codes(c); return norm(c.properties.name).indexOf(q) !== -1 || c.properties.a.concat(c.properties.l).some(function (n) { return norm(n).indexOf(q) !== -1; }) || (k && (norm(k.a2) === q || norm(k.a3) === q)); })
+      .sort(function (a, b) { return rank(a) - rank(b); }).slice(0, 8);
+    // Exact matches of a code or another name first, then names that start with the text, then the rest.
+    function rank(c) {
+      var k = codes(c); if (k && (norm(k.a2) === q || norm(k.a3) === q)) return 0;
+      if (c.properties.a.concat(c.properties.l).some(function (n) { return norm(n) === q; })) return 0;
+      return norm(c.properties.name).indexOf(q) === 0 || c.properties.l.some(function (n) { return norm(n).indexOf(q) === 0; }) ? 1 : 2;
+    }
     active = matches.length ? 0 : -1;
     list.replaceChildren();
     if (!matches.length) { var li = document.createElement("li"); li.className = "empty"; li.textContent = "No matching country"; list.appendChild(li); }
     matches.forEach(function (c, i) {
       var li = document.createElement("li"); li.id = "opt-" + i; li.setAttribute("role", "option");
       li.appendChild(dot(data[c.key] || "none"));
-      li.appendChild(document.createTextNode(fullName(c)));
+      // English | names in the official languages | flag. When only an official name matches, it moves to the front.
+      var pr = c.properties, local = pr.l.slice();
+      if (norm(pr.name).indexOf(q) === -1) local.sort(function (a, b) { return (norm(a).indexOf(q) !== -1 ? 0 : 1) - (norm(b).indexOf(q) !== -1 ? 0 : 1); });
+      function part(cls, text) { var s = document.createElement("span"); s.className = cls; s.textContent = text; li.appendChild(s); return s; }
+      part("r-en", pr.name);
+      if (local.length) {
+        part("r-sep", "|").setAttribute("aria-hidden", "true");
+        var nat = part("r-local", ""); nat.title = local.join(" · ");
+        local.forEach(function (n, j) { if (j) nat.appendChild(document.createTextNode(" · ")); var bd = document.createElement("bdi"); bd.textContent = n; nat.appendChild(bd); });
+      }
+      if (pr.f) { part("r-sep", "|").setAttribute("aria-hidden", "true"); part("r-flag", pr.f); }
       li.addEventListener("mousedown", function (e) { e.preventDefault(); pick(i); });
       list.appendChild(li);
     });

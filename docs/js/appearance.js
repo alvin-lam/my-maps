@@ -34,14 +34,21 @@
     d = new Date(d.getFullYear(), d.getMonth(), d.getDate());
     var y = d.getFullYear(), m = d.getMonth(), day = d.getDate();
     if ((m === 11 && day >= 27) || (m === 0 && day <= 2)) return "new-years-eve";
-    if (near(d, y, LUNAR[y], 7, 15)) return "lunar-new-year";
-    if (near(d, y, DIWALI[y], 2, 2)) return "diwali";
+    // Holidays that can overlap: on a shared day, the one whose own date is closer wins (the first listed on a tie).
+    var shared = [
+      ["lunar-new-year", LUNAR[y], near(d, y, LUNAR[y], 7, 15)],
+      ["valentines-day", [1, 14], m === 1 && day >= 7 && day <= 14],
+      ["diwali", DIWALI[y], near(d, y, DIWALI[y], 2, 2)],
+      ["halloween", [9, 31], m === 9 && day >= 15]
+    ].filter(function (h) { return h[2]; });
+    if (shared.length) {
+      var gap = function (h) { return Math.abs(Math.round((d - new Date(y, h[1][0], h[1][1])) / 864e5)); };
+      return shared.reduce(function (a, b) { return gap(b) < gap(a) ? b : a; })[0];
+    }
     if (near(d, y, thanksgiving(y), 3, 3)) return "thanksgiving";
-    if (m === 1 && day >= 7 && day <= 14) return "valentines-day";
     if (m === 2 && day >= 10 && day <= 17) return "st-patricks-day";
     if (m === 3 && day >= 15 && day <= 22) return "earth-day";
     if (m === 11 && day <= 26) return "christmas";
-    if (m === 9 && day >= 15) return "halloween";
     if ((m === 5 && day >= 28) || (m === 6 && day <= 5)) return "independence-day";
     if (m === 5) return "pride";
     // Seasons flip for the southern hemisphere; holidays stay on their dates.
@@ -56,7 +63,7 @@
   var mapStyle = get("my-maps-map-style"); if (mapStyle !== "outline" && mapStyle !== "vintage") mapStyle = "flat";
   var decor = get("my-maps-decorations") === "off" ? "off" : "on";
   var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var scheme = get(SCHEME_KEY); if (scheme !== "auto" && !byId[scheme]) scheme = "auto";
+  var scheme = get(SCHEME_KEY); if (scheme !== "auto" && !Object.prototype.hasOwnProperty.call(byId, scheme)) scheme = "auto";
   function resolved() { return scheme === "auto" ? forDate(new Date()) : scheme; }
 
   function applyMode() { if (mode === "system") root.removeAttribute("data-theme"); else root.setAttribute("data-theme", mode); }
@@ -88,7 +95,7 @@
     thanksgiving: { type: "fall", items: ["🍂", "🍁"] }
   };
   // Builds a decoration for a W x H area. step(ctx, t, dt) draws one frame; t is milliseconds since start.
-  // Shared by the live map and the animated GIF download.
+  // Shared by the live map and the holiday Share video.
   var DURATION = 7000;
   function makeDecor(id, W, H) {
     var d = DECOR[id]; if (!d) return null;
@@ -267,11 +274,14 @@
     setTimeout(decorate, 1200);
     if (media && media.addEventListener) media.addEventListener("change", sync);
     sync();
+    // A page left open past midnight moves on to the next day's scheme without a reload.
+    var shown = resolved();
+    setInterval(function () { var now = resolved(); if (now !== shown) { shown = now; applyScheme(); sync(); decorate(); } }, 60000);
 
     // When "Automatic" switches to a holiday, say so once and offer to keep it or go back to Classic.
     var r = resolved();
     if (scheme === "auto" && HOLIDAYS[r]) {
-      var tag = r + "-" + new Date().getFullYear(), toast = document.getElementById("app-toast");
+      var now = new Date(), tag = r + "-" + (r === "new-years-eve" && now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear()), toast = document.getElementById("app-toast");
       if (toast && get(ACK_KEY) !== tag) {
         setTimeout(function () {
           if (!toast.hidden) return;

@@ -11,8 +11,8 @@ Live site: https://mymaps.alltripsconsidered.com/
 ### Marking places
 
 - **Four statuses:** Visited, Planning, Lived and Living.
-- **Search:** Find any place by name or by its two- or three-letter country code. Names are spelled out in full, and each shows its flag.
-- **Zoom and pan:** Use the buttons, a mouse wheel or touch gestures.
+- **Search:** Find any place by its English name, by its name in its official languages, or by its two- or three-letter country code. Deutschland, 日本 and España all work, as do former and common names such as Turkey, Swaziland or Ivory Coast, and "St" finds "Saint". Each result reads English name | official-language names | flag, for example "Switzerland | Schweiz · Suisse · Svizzera | 🇨🇭". The English name is not repeated, so France reads "France | 🇫🇷" and India "India | भारत | 🇮🇳".
+- **Zoom and pan:** Use the buttons, a mouse wheel or touch gestures. On phones, one finger scrolls the page and two fingers zoom the map; once the map is zoomed in, one finger moves it.
 - **Small places:** Islands and microstates too small to see get a dot that can be tapped and takes the status color.
 - **Counts and lists:** See totals for each status and a full list under "My countries".
 
@@ -25,7 +25,7 @@ Live site: https://mymaps.alltripsconsidered.com/
 ### Export, download and share
 
 - **Export:** Save your list as CSV, JSON or TXT.
-- **Download:** Save the map as JPG, PNG or SVG in the same design as the Share images: a headline with the number of countries you have been to, the map, your status counts and the site address, in the wide 1.91:1 shape. JPG and PNG are 2160 × 1132; the SVG is 1080 × 566 and scales to any size.
+- **Download:** Save the map as JPG, PNG or SVG in the same design as the Share images: a headline with the number of countries you have been to, the map, your status counts and the site address, in the wide 1.91:1 shape. JPG and PNG are 2160 × 1132. The SVG opens at the same size, scales to any size and carries its own copy of the title font.
 - **Share:** Make an Instagram-ready image of your map.
   - **Shapes:** Square (1:1, 1080 × 1080), Portrait (4:5, 1080 × 1350), Landscape (1.91:1, 1080 × 566) and Story (9:16, 1080 × 1920).
   - **Design:** A headline with the number of countries you have been to, the map, your status counts and the site address, in your color scheme. Story images keep text clear of the top and bottom 250 px that Instagram covers.
@@ -40,7 +40,7 @@ One button opens the Appearance panel.
 - **Mode:** System, Light or Dark. System follows the device.
 - **Map style:** Flat, Outline (a tinted fill with a bold border) or Vintage (parchment tones).
 - **Color scheme:**
-  - **Automatic** is the default. It follows the seasons and these holidays: New Year's Eve, Lunar New Year, Valentine's Day, St. Patrick's Day, Earth Day, Pride, Independence Day, Halloween, Diwali, Thanksgiving and Christmas.
+  - **Automatic** is the default. It follows the seasons and these holidays: New Year's Eve, Lunar New Year, Valentine's Day, St. Patrick's Day, Earth Day, Pride, Independence Day, Halloween, Diwali, Thanksgiving and Christmas. When two holidays overlap, the one whose own date is closer wins, so Valentine's Day always has February 14 and Halloween always has October 31.
   - **Classic:** Classic, Daylight (best in light mode) and Midnight (best in dark mode).
   - **Seasons:** Spring, Summer, Autumn and Winter. Seasons follow the hemisphere of the device time zone.
   - **Holidays:** All the holidays above, plus Holi, Día de los Muertos and Hanukkah, which can only be picked by hand.
@@ -88,13 +88,13 @@ docs/favicon.ico                        Favicon: the globe app icon (16, 32 and 
 docs/assets/og-image.png                Preview image for links shared on social media
 docs/assets/fonts/                      Instrument Serif and its license (OFL.txt)
 docs/vendor/                            D3 and TopoJSON Client
-docs/vendor/licenses/                   Licenses for the vendored libraries
+docs/vendor/licenses/                   Licenses for the vendored libraries and Unicode CLDR
 docs/robots.txt                         Search engine crawl rules
 docs/sitemap.xml                        Page list for search engines
 docs/CNAME                              Custom domain for GitHub Pages
 README.md                               This file
 scripts/build-map.mjs                   Builds docs/data/world.json and docs/data/places.json
-scripts/rules.mjs                       Territory splits, tiny places and full names
+scripts/rules.mjs                       Territory splits, tiny places, full names, other names and notes
 scripts/source/disputed.json            Disputed and occupied area outlines
 scripts/package.json                    Build tools for the map data
 scripts/package-lock.json               Locked versions of the build tools
@@ -105,7 +105,7 @@ scripts/package-lock.json               Locked versions of the build tools
 The browser loads two ready-made files instead of fixing up raw map data on every visit:
 
 - `docs/data/world.json` holds the shapes. Territories are split from their home country, tiny places are added as small circles, and disputed areas are cut out of the countries around them. Borders are simplified to about the detail the map can show, and small places keep every point so they never disappear.
-- `docs/data/places.json` holds each place's name, two- and three-letter codes, flag and note.
+- `docs/data/places.json` holds each place's name, its names in its official languages, other names people search for, its two- and three-letter codes, flag and note. The official-language names come from [Unicode CLDR](https://cldr.unicode.org), which lists each country's official languages and its name in each. Places CLDR does not cover, such as the disputed areas, are listed in `NATIVE` in `scripts/rules.mjs`.
 
 Each place keeps the same key the site has always saved, such as `840` for the United States or `x-Crimea`, so visitors' maps carry over unchanged.
 
@@ -139,7 +139,7 @@ Each status appears in a few places. To add one, update all of them:
 
 1. `docs/css/styles.css`: add a color token in the light and dark theme rules and in each color scheme, then add the `.dot-*`, `.country.*` and `.status-btn` rules.
 2. `docs/index.html`: add a count in the stats bar and a button in the chooser.
-3. `docs/js/map.js`: add the status to `STATUSES`, `LABEL` and the `col` color map used by image downloads.
+3. `docs/js/map.js`: add the status to `STATUSES` and `LABEL`, and to the color list `c` in `imageLayout()`, which image downloads use.
 
 ### Adding a color scheme
 
@@ -211,7 +211,7 @@ GitHub Pages publishes the `/docs` folder of the `prod` branch (**Settings > Pag
 - [ ] **Smaller D3:** D3 is served from the site, but in full. Bundling only the parts the map uses would cut about 200 KB.
 - [ ] **Accessibility review:** Check color contrast in every scheme, especially holiday schemes in dark mode and the Vintage style. Add a "Skip to search" link so keyboard users do not have to tab through every country, and make sure counts and messages are announced by screen readers.
 - [ ] **Repository housekeeping:** Redirect the old `world.alltripsconsidered.com` address, and update local checkouts to the renamed repository.
-- [ ] **Diwali dates:** Check the Diwali dates from 2028 onward against a calendar.
+- [ ] **Holiday dates after 2035:** The Lunar New Year and Diwali tables in `docs/js/appearance.js` end in 2035. Add later years before then, or Automatic will skip both holidays from 2036.
 - [ ] **Search and growth:** Add a "How it works" and FAQ section with FAQ structured data, a 404 page, shareable map links and links to My Maps from alltripsconsidered.com. Submit the sitemap in Google Search Console and Bing Webmaster Tools.
 
 ## Credits and licenses
@@ -220,6 +220,7 @@ GitHub Pages publishes the `/docs` folder of the `prod` branch (**Settings > Pag
 - **Libraries:** These are served from `docs/vendor/`, with their licenses in `docs/vendor/licenses/`:
   - [D3](https://d3js.org) 7.9.0 for the map projection and zoom.
   - [TopoJSON Client](https://github.com/topojson/topojson-client) 3.1.0 for reading the map shapes.
+- **Country names in other languages:** [Unicode CLDR](https://cldr.unicode.org) 49, under the Unicode License (`docs/vendor/licenses/unicode-cldr.txt`).
 - **Map data:** Country borders come from [World Atlas](https://github.com/topojson/world-atlas) 2.0.2, and disputed area outlines come from [Natural Earth](https://www.naturalearthdata.com). Both are in the public domain.
 
 <p align="center">
