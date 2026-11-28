@@ -172,15 +172,39 @@ the site actually does.
 
 ## Report
 
-Group findings under the eight check headings. Within each group, rank from
-most to least severe. For each finding give:
-- the file and line (`path:line`) or the page and control;
-- the steps or input that trigger it;
-- the expected result and the actual result;
-- the evidence: a run, a screenshot path, or a quoted source with URL;
-- confidence: "Confirmed" (reproduced) or "Likely" (from reading code or a
-  source).
+Publish the report as an HTML page with the Artifact tool, titled
+"My Maps QC Report", in the same layout as the Points Calculator QC
+Report. Re-running the agent updates the same page. The page has these
+parts, in this order:
 
-Leave out style opinions. Then add a "Could not verify" list and a short
-summary of what passed, for example "270 of 270 places have a shape and a
-code". Finally, stop the web server and delete the temporary directory.
+1. **Header**: "Quality check, run N" with the date, the title, and one
+   line naming the branch and commit tested.
+2. **tl;dr**: three panels side by side (stacked on phones).
+   - **What is working**: 5 to 8 short lines with counts, such as
+     "270 of 270 places have a shape and a code".
+   - **What is not working**: the most important problems in plain words,
+     the worst first and in bold.
+   - **What you need to do**: a numbered list of human actions only:
+     fixes to approve, decisions to make, sources to check by hand and
+     settings outside the repository (such as Cloudflare or Search Console).
+3. **Stats**: a row of 4 to 6 number tiles, such as places checked, files
+   checked, high-severity bugs and README lines out of date.
+4. **Fix these first**: up to six findings most likely to hurt a visitor,
+   each with a severity tag and two sentences.
+5. **One section per check**, headed "Check N" and the check name. Each
+   finding is a card with a severity tag (High, Medium or Low), its title,
+   its confidence, and Where, Steps, Expected and Actual. Add a screenshot
+   when it shows the problem. Small related issues may share one card as a
+   list. Check 3 and check 8 use tables (place or README line, what changed
+   or what it says, rating, source). End each section with a green
+   "Passed" box.
+6. **Agent findings rejected after checking**, when any were.
+7. **Could not verify**: blocked sources and untested browsers.
+
+Severity: High means a visitor sees wrong data, loses saved data or a main
+feature breaks. Medium means a visible bug with a workaround. Low means a
+small or rare issue. Before publishing, reproduce every High finding
+yourself and drop or downgrade any that do not hold.
+
+Write in short, plain sentences without em dashes. Leave out style
+opinions. Finally, stop the web server and delete the temporary directory.
