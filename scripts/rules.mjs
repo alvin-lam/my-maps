@@ -88,4 +88,39 @@ var NOTES = {
   "732": "Non-self-governing territory; mostly administered by Morocco; claimed by the Sahrawi Republic"
 };
 
-export { ISO, FULL, ALIAS, NOTES, TERRITORIES, TINY, splitTerritories };
+// Names in the official languages. Most come from Unicode CLDR in scripts/build-map.mjs.
+// These places have no CLDR region or no CLDR name, so their local names are listed here,
+// in the official languages of the place, or of the country that administers or claims it.
+var NATIVE_REGION = { "x-Canary Islands": "IC" };
+// Official languages that CLDR lists only as regional. South Africa's constitution names 12, including sign language.
+var OFFICIAL_LANGS = { "710": ["zu", "xh", "af", "en", "nso", "tn", "st", "ts", "ss", "ve", "nr"] };
+var NATIVE = {
+  "260": ["Terres australes et antarctiques françaises"],
+  "316": ["Guam", "Guåhån"],
+  "334": ["Heard Island and McDonald Islands"],
+  "462": ["ދިވެހިރާއްޖެ"],
+  "016": ["American Samoa", "Amerika Sāmoa"],
+  "074": ["Bouvetøya"],
+  "x-Azores": ["Açores"],
+  "x-Madeira": ["Madeira"],
+  "x-Ashmore and Cartier Is.": ["Ashmore and Cartier Islands"],
+  "x-Transnistria": ["Transnistria"],
+  "x-Siachen Glacier": ["सियाचिन ग्लेशियर"],
+  "x-Ilemi Triangle": ["Ilemi Triangle"],
+  "x-Somaliland": ["Soomaaliland", "أرض الصومال"],
+  "x-N. Cyprus": ["Kuzey Kıbrıs"],
+  "x-Crimea": ["Крим"],
+  "x-Donetsk": ["Донецьк"],
+  "x-Luhansk": ["Луганськ"],
+  "x-Golan Heights": ["الجولان"],
+  "x-Abkhazia": ["აფხაზეთი"],
+  "x-South Ossetia": ["სამხრეთ ოსეთი"],
+  "x-Kuril Islands": ["Курильские острова", "千島列島"],
+  "x-Arunachal Pradesh": ["अरुणाचल प्रदेश"],
+  "x-Jammu and Kashmir": ["जम्मू और कश्मीर"],
+  "x-Aksai Chin": ["阿克赛钦"],
+  "x-Gilgit-Baltistan": ["گلگت بلتستان"],
+  "x-Abyei": ["أبيي"]
+};
+
+export { ISO, FULL, ALIAS, NOTES, NATIVE, NATIVE_REGION, OFFICIAL_LANGS, TERRITORIES, TINY, splitTerritories };

@@ -1,6 +1,6 @@
 // Builds the map data the site loads:
 //   data/world.json   TopoJSON shapes, one geometry per place, id = the key saved in visitors' browsers
-//   data/places.json  { key: { n: name, c2, c3, f: flag, note, a: other names } }
+//   data/places.json  { key: { n: name, c2, c3, f: flag, note, a: other names, l: names in official languages } }
 // Run from this folder:  npm install && npm run build
 import { readFileSync, writeFileSync } from "node:fs";
 import * as d3 from "d3-geo";
@@ -8,7 +8,7 @@ import * as topojsonClient from "topojson-client";
 import { topology } from "topojson-server";
 import { presimplify, simplify, quantile, sphericalTriangleArea } from "topojson-simplify";
 import polygonClipping from "polygon-clipping";
-import { ISO, FULL, ALIAS, NOTES, splitTerritories } from "./rules.mjs";
+import { ISO, FULL, ALIAS, NOTES, NATIVE, NATIVE_REGION, OFFICIAL_LANGS, splitTerritories } from "./rules.mjs";
 
 const require = (p) => JSON.parse(readFileSync(new URL(import.meta.resolve(p))));
 const atlas = require("world-atlas/countries-50m.json");
@@ -44,6 +44,34 @@ for (const f of features) {
   if (changed) f.geometry = { type: "MultiPolygon", coordinates: fixWinding(geom) };
 }
 
+// Names in each place's official languages, from Unicode CLDR: the languages CLDR marks official
+// (or de facto official where none is), most spoken first. A name can match the English one, as France does.
+const territoryInfo = require("cldr-core/supplemental/territoryInfo.json").supplemental.territoryInfo;
+const cldrNames = {};
+function regionName(lang, region) {
+  for (const loc of [lang.replace("_", "-"), lang.split("_")[0]]) {
+    if (!(loc in cldrNames)) {
+      try { cldrNames[loc] = require("cldr-localenames-full/main/" + loc + "/territories.json").main[loc].localeDisplayNames.territories; }
+      catch (e) { cldrNames[loc] = null; }
+    }
+    if (cldrNames[loc] && cldrNames[loc][region]) return cldrNames[loc][region];
+  }
+  return null;
+}
+function nativeNames(region, key) {
+  const langs = region && territoryInfo[region] && territoryInfo[region].languagePopulation;
+  if (!langs) return [];
+  const pick = (s) => Object.keys(langs).filter((l) => langs[l]._officialStatus === s);
+  const list = OFFICIAL_LANGS[key] || (pick("official").length ? pick("official") : pick("de_facto_official"))
+    .sort((a, b) => Number(langs[b]._populationPercent) - Number(langs[a]._populationPercent));
+  const seen = new Set(), out = [];
+  for (const l of list) {
+    const n = regionName(l, region);
+    if (n && !seen.has(n.toLowerCase())) { seen.add(n.toLowerCase()); out.push(n); }
+  }
+  return out;
+}
+
 // 4. Places file: names, codes, flags and notes, keyed by the saved key.
 const places = {};
 for (const f of features) {
@@ -54,6 +82,8 @@ for (const f of features) {
   } else if (f.properties.flag) p.f = f.properties.flag;
   if (f.properties.note || NOTES[f.key]) p.note = f.properties.note || NOTES[f.key];
   if (ALIAS[f.key]) p.a = ALIAS[f.key];
+  const l = NATIVE[f.key] || nativeNames(NATIVE_REGION[f.key] || p.c2, f.key);
+  if (l.length) p.l = l;
   if (f.properties.tiny) p.tiny = 1;
   places[f.key] = p;
 }

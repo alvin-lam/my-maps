@@ -230,6 +230,10 @@ body.has-install-banner { padding-bottom: var(--install-banner-height, 140px); }
 .search-results li { padding: 8px 10px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
 .search-results li[aria-selected="true"], .search-results li:hover { background: var(--bg); }
 .search-results .empty { color: var(--muted); cursor: default; }
+.search-results li > * { flex: none; }
+.search-results .r-en { flex: 0 1 auto; min-width: 0; }
+.search-results .r-local { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted); }
+.search-results .r-sep { color: var(--border); }
 .stats { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-bottom: 12px; font-size: .95rem; }
 .stat { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); }
 .stat b { color: var(--text); }

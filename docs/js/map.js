@@ -96,7 +96,7 @@
     fc.features.forEach(function (f) {
       var p = info[f.id] || { n: f.id };
       f.key = f.id;
-      f.properties = { name: p.n, c2: p.c2, c3: p.c3, f: p.f, note: p.note, tiny: p.tiny, a: p.a || [] };
+      f.properties = { name: p.n, c2: p.c2, c3: p.c3, f: p.f, note: p.note, tiny: p.tiny, a: p.a || [], l: p.l || [] };
       rewind(f);
       byId[f.key] = f;
     });
@@ -557,17 +557,27 @@
     // "St" and "St." also match "Saint", as in St Kitts or St. Lucia.
     var q = norm(input.value.trim()).replace(/(^|\s)st\.?(\s|$)/g, "$1saint$2").trim();
     if (!q) { list.hidden = true; input.setAttribute("aria-expanded", "false"); return; }
-    matches = countries.filter(function (c) { var k = codes(c); return norm(c.properties.name).indexOf(q) !== -1 || c.properties.a.some(function (n) { return norm(n).indexOf(q) !== -1; }) || (k && (norm(k.a2) === q || norm(k.a3) === q)); })
+    matches = countries.filter(function (c) { var k = codes(c); return norm(c.properties.name).indexOf(q) !== -1 || c.properties.a.concat(c.properties.l).some(function (n) { return norm(n).indexOf(q) !== -1; }) || (k && (norm(k.a2) === q || norm(k.a3) === q)); })
       .sort(function (a, b) { return rank(a) - rank(b); }).slice(0, 8);
     // Exact code matches first, then names that start with the text, then the rest.
-    function rank(c) { var k = codes(c); if (k && (norm(k.a2) === q || norm(k.a3) === q)) return 0; return norm(c.properties.name).indexOf(q) === 0 ? 1 : 2; }
+    function rank(c) { var k = codes(c); if (k && (norm(k.a2) === q || norm(k.a3) === q)) return 0; return norm(c.properties.name).indexOf(q) === 0 || c.properties.l.some(function (n) { return norm(n).indexOf(q) === 0; }) ? 1 : 2; }
     active = matches.length ? 0 : -1;
     list.replaceChildren();
     if (!matches.length) { var li = document.createElement("li"); li.className = "empty"; li.textContent = "No matching country"; list.appendChild(li); }
     matches.forEach(function (c, i) {
       var li = document.createElement("li"); li.id = "opt-" + i; li.setAttribute("role", "option");
       li.appendChild(dot(data[c.key] || "none"));
-      li.appendChild(document.createTextNode(fullName(c)));
+      // English | names in the official languages | flag. When only an official name matches, it moves to the front.
+      var pr = c.properties, local = pr.l.slice();
+      if (norm(pr.name).indexOf(q) === -1) local.sort(function (a, b) { return (norm(a).indexOf(q) !== -1 ? 0 : 1) - (norm(b).indexOf(q) !== -1 ? 0 : 1); });
+      function part(cls, text) { var s = document.createElement("span"); s.className = cls; s.textContent = text; li.appendChild(s); return s; }
+      part("r-en", pr.name);
+      if (local.length) {
+        part("r-sep", "|").setAttribute("aria-hidden", "true");
+        var nat = part("r-local", ""); nat.title = local.join(" · ");
+        local.forEach(function (n, j) { if (j) nat.appendChild(document.createTextNode(" · ")); var bd = document.createElement("bdi"); bd.textContent = n; nat.appendChild(bd); });
+      }
+      if (pr.f) { part("r-sep", "|").setAttribute("aria-hidden", "true"); part("r-flag", pr.f); }
       li.addEventListener("mousedown", function (e) { e.preventDefault(); pick(i); });
       list.appendChild(li);
     });
