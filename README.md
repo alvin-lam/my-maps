@@ -88,7 +88,7 @@ docs/favicon.ico                        Favicon: the globe app icon (16, 32 and 
 docs/assets/og-image.png                Preview image for links shared on social media
 docs/assets/fonts/                      Instrument Serif and its license (OFL.txt)
 docs/vendor/                            D3 and TopoJSON Client
-docs/vendor/licenses/                   Licenses for the vendored libraries
+docs/vendor/licenses/                   Licenses for the vendored libraries and Unicode CLDR
 docs/robots.txt                         Search engine crawl rules
 docs/sitemap.xml                        Page list for search engines
 docs/CNAME                              Custom domain for GitHub Pages
