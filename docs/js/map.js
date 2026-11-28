@@ -69,8 +69,16 @@
     var w = svg.node().getBoundingClientRect().width || W, px = w < 600 ? 4.5 : 3;
     return px * (W / w) / k;
   }
-  var zoom = d3.zoom().scaleExtent([1, 12]).translateExtent([[0, 0], [W, H]]).extent([[0, 0], [W, H]]).on("zoom", function (e) {
+  // On phones, one finger scrolls the page while the map is at its normal size; two fingers zoom it.
+  // Once it is zoomed in, one finger moves the map.
+  var zoom = d3.zoom().scaleExtent([1, 12]).translateExtent([[0, 0], [W, H]]).extent([[0, 0], [W, H]])
+    .filter(function (e) {
+      if (e.type === "touchstart" && e.touches.length < 2 && d3.zoomTransform(svg.node()).k <= 1) return false;
+      return (!e.ctrlKey || e.type === "wheel") && !e.button;
+    })
+    .on("zoom", function (e) {
     g.attr("transform", e.transform);
+    wrap.classList.toggle("zoomed", e.transform.k > 1);
     g.selectAll("circle.marker").attr("r", markerR(e.transform.k));
   });
   svg.call(zoom).on("dblclick.zoom", null);

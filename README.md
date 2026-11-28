@@ -12,7 +12,7 @@ Live site: https://mymaps.alltripsconsidered.com/
 
 - **Four statuses:** Visited, Planning, Lived and Living.
 - **Search:** Find any place by name or by its two- or three-letter country code. Former and common names also work, such as Turkey, Swaziland or Ivory Coast, and "St" finds "Saint". Names are spelled out in full, and each shows its flag.
-- **Zoom and pan:** Use the buttons, a mouse wheel or touch gestures.
+- **Zoom and pan:** Use the buttons, a mouse wheel or touch gestures. On phones, one finger scrolls the page and two fingers zoom the map; once the map is zoomed in, one finger moves it.
 - **Small places:** Islands and microstates too small to see get a dot that can be tapped and takes the status color.
 - **Counts and lists:** See totals for each status and a full list under "My countries".
 
