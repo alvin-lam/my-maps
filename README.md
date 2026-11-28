@@ -162,6 +162,7 @@ The page's search and sharing details live in the `<head>` of `docs/index.html`:
 | Preview image | `docs/assets/og-image.png`, 1200 × 630, with alt text |
 | Canonical address | https://mymaps.alltripsconsidered.com/ |
 | Structured data | WebApplication, Organization, WebSite and an ItemList of the Travel Tools |
+| Last modified | 2026-11-28, in the sitemap and the structured data |
 
 Keep the page title under about 60 characters and the description under about 150, so search results show them in full. The same description is used in the social tags, the structured data and `docs/manifest.webmanifest`; change it in all four places together.
 
