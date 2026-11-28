@@ -63,7 +63,7 @@
   var mapStyle = get("my-maps-map-style"); if (mapStyle !== "outline" && mapStyle !== "vintage") mapStyle = "flat";
   var decor = get("my-maps-decorations") === "off" ? "off" : "on";
   var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var scheme = get(SCHEME_KEY); if (scheme !== "auto" && !byId[scheme]) scheme = "auto";
+  var scheme = get(SCHEME_KEY); if (scheme !== "auto" && !Object.prototype.hasOwnProperty.call(byId, scheme)) scheme = "auto";
   function resolved() { return scheme === "auto" ? forDate(new Date()) : scheme; }
 
   function applyMode() { if (mode === "system") root.removeAttribute("data-theme"); else root.setAttribute("data-theme", mode); }
@@ -95,7 +95,7 @@
     thanksgiving: { type: "fall", items: ["🍂", "🍁"] }
   };
   // Builds a decoration for a W x H area. step(ctx, t, dt) draws one frame; t is milliseconds since start.
-  // Shared by the live map and the animated GIF download.
+  // Shared by the live map and the holiday Share video.
   var DURATION = 7000;
   function makeDecor(id, W, H) {
     var d = DECOR[id]; if (!d) return null;
@@ -274,11 +274,14 @@
     setTimeout(decorate, 1200);
     if (media && media.addEventListener) media.addEventListener("change", sync);
     sync();
+    // A page left open past midnight moves on to the next day's scheme without a reload.
+    var shown = resolved();
+    setInterval(function () { var now = resolved(); if (now !== shown) { shown = now; applyScheme(); sync(); decorate(); } }, 60000);
 
     // When "Automatic" switches to a holiday, say so once and offer to keep it or go back to Classic.
     var r = resolved();
     if (scheme === "auto" && HOLIDAYS[r]) {
-      var tag = r + "-" + new Date().getFullYear(), toast = document.getElementById("app-toast");
+      var now = new Date(), tag = r + "-" + (r === "new-years-eve" && now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear()), toast = document.getElementById("app-toast");
       if (toast && get(ACK_KEY) !== tag) {
         setTimeout(function () {
           if (!toast.hidden) return;

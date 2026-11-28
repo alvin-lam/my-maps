@@ -133,9 +133,10 @@
 
   // Service worker: offline support and update prompts.
   if (!("serviceWorker" in navigator) || location.protocol === "file:") return;
-  var reloading = false;
+  // Reload when an update takes over. On a first visit the worker takes control of a page that is already current, so stay put.
+  var reloading = false, hadController = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.addEventListener("controllerchange", function () {
-    if (reloading) return; reloading = true; location.reload();
+    if (reloading || !hadController) return; reloading = true; location.reload();
   });
   window.addEventListener("load", function () {
     var firstInstall = !navigator.serviceWorker.controller;
@@ -151,15 +152,19 @@
         showToast("A new version of My Maps is ready.", "Reload", function () { worker.postMessage("skip-waiting"); });
       }
       if (reg.waiting && navigator.serviceWorker.controller) offerUpdate(reg.waiting);
-      reg.addEventListener("updatefound", function () {
-        var worker = reg.installing;
+      var toldOffline = false;
+      function ready() { if (firstInstall && !toldOffline) { toldOffline = true; showToast("My Maps is ready to use offline."); } }
+      function watch(worker) {
         if (!worker) return;
         worker.addEventListener("statechange", function () {
           if (worker.state !== "installed") return;
-          if (navigator.serviceWorker.controller) offerUpdate(worker);
-          else if (firstInstall) showToast("My Maps is ready to use offline.");
+          if (navigator.serviceWorker.controller) offerUpdate(worker); else ready();
         });
-      });
+      }
+      // On a first visit the worker can finish installing before this code runs, so check where it already is.
+      if (reg.installing) watch(reg.installing);
+      else if (firstInstall && reg.active) ready();
+      reg.addEventListener("updatefound", function () { watch(reg.installing); });
       // Check for a new version when the app comes back to the foreground.
       document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible") reg.update().catch(function () {}); });
     }).catch(function () {});

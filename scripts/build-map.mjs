@@ -1,6 +1,6 @@
 // Builds the map data the site loads:
 //   data/world.json   TopoJSON shapes, one geometry per place, id = the key saved in visitors' browsers
-//   data/places.json  { key: { n: name, c2, c3, f: flag, note } }
+//   data/places.json  { key: { n: name, c2, c3, f: flag, note, a: other names } }
 // Run from this folder:  npm install && npm run build
 import { readFileSync, writeFileSync } from "node:fs";
 import * as d3 from "d3-geo";
@@ -8,7 +8,7 @@ import * as topojsonClient from "topojson-client";
 import { topology } from "topojson-server";
 import { presimplify, simplify, quantile, sphericalTriangleArea } from "topojson-simplify";
 import polygonClipping from "polygon-clipping";
-import { ISO, FULL, splitTerritories } from "./rules.mjs";
+import { ISO, FULL, ALIAS, NOTES, splitTerritories } from "./rules.mjs";
 
 const require = (p) => JSON.parse(readFileSync(new URL(import.meta.resolve(p))));
 const atlas = require("world-atlas/countries-50m.json");
@@ -52,7 +52,8 @@ for (const f of features) {
     p.c2 = v.slice(0, 2); p.c3 = v.slice(2);
     p.f = String.fromCodePoint(0x1f1e6 + p.c2.charCodeAt(0) - 65, 0x1f1e6 + p.c2.charCodeAt(1) - 65);
   } else if (f.properties.flag) p.f = f.properties.flag;
-  if (f.properties.note) p.note = f.properties.note;
+  if (f.properties.note || NOTES[f.key]) p.note = f.properties.note || NOTES[f.key];
+  if (ALIAS[f.key]) p.a = ALIAS[f.key];
   if (f.properties.tiny) p.tiny = 1;
   places[f.key] = p;
 }

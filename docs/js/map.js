@@ -36,6 +36,8 @@
     var v;
     try { v = JSON.parse(localStorage.getItem(KEY)); } catch (e) { return {}; }
     if (!v || typeof v !== "object" || Array.isArray(v)) return {};
+    // Keep only known statuses, so a damaged or hand-edited value never shows as "undefined".
+    Object.keys(v).forEach(function (k) { if (STATUSES.indexOf(v[k]) === -1) delete v[k]; });
     var moved = false;
     Object.keys(MOVED).forEach(function (old) {
       if (!(old in v)) return;
@@ -45,7 +47,18 @@
     if (moved) { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch (e) {} }
     return v;
   }
-  function save() { try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {} }
+  var warnedSave = false;
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(data)); }
+    catch (e) {
+      if (warnedSave) return; warnedSave = true;
+      var t = document.getElementById("app-toast"); if (!t) return;
+      var s = document.createElement("span");
+      s.textContent = "This change couldn't be saved. Your browser's storage may be full or turned off, so the map will reset when you close it.";
+      t.replaceChildren(s); t.hidden = false;
+      setTimeout(function () { t.hidden = true; }, 8000);
+    }
+  }
   // Read the latest saved map before each change, so a change made in another tab or window is kept.
   function change(fn) { data = load(); fn(); save(); render(); }
   window.addEventListener("storage", function (e) { if (e.key === KEY || e.key === null) { data = load(); render(); } });
@@ -75,7 +88,7 @@
     fc.features.forEach(function (f) {
       var p = info[f.id] || { n: f.id };
       f.key = f.id;
-      f.properties = { name: p.n, c2: p.c2, c3: p.c3, f: p.f, note: p.note, tiny: p.tiny };
+      f.properties = { name: p.n, c2: p.c2, c3: p.c3, f: p.f, note: p.note, tiny: p.tiny, a: p.a || [] };
       rewind(f);
       byId[f.key] = f;
     });
@@ -149,16 +162,27 @@
   }
   function closeChooser() { selectedId = null; chooser.hidden = true; render(); }
   document.getElementById("chooser-close").addEventListener("click", closeChooser);
+  // Escape closes the chooser, as it closes the other panels. The search box uses Escape for its own list.
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Escape" || chooser.hidden || e.target.id === "country-search") return;
+    var panel = document.getElementById("appearance-panel"); if (panel && !panel.hidden) return;
+    if (document.querySelector(".dl-menu:not([hidden])")) return;
+    closeChooser();
+  });
   document.querySelectorAll(".status-btn").forEach(function (b) {
+    var last = 0;
     b.addEventListener("click", function () {
       if (!selectedId) return;
+      // A double click or double tap counts once, so it never turns the status on and straight off again.
+      var now = Date.now(); if (now - last < 400) return; last = now;
       var id = selectedId, s = b.dataset.status;
       change(function () { if (data[id] === s) delete data[id]; else data[id] = s; });
     });
   });
   document.getElementById("chooser-clear").addEventListener("click", function () { if (selectedId) { var id = selectedId; change(function () { delete data[id]; }); } });
   document.getElementById("reset-all").addEventListener("click", function () {
-    if (!Object.keys(data).length || !confirm("Clear all countries from your map?")) return;
+    if (!Object.keys(data).length) return;
+    if (Object.keys(data).some(function (k) { return byId[k]; }) && !confirm("Clear all countries from your map?")) return;
     change(function () { data = {}; });
   });
   document.getElementById("zoom-in").addEventListener("click", function () { svg.transition().call(zoom.scaleBy, 1.6); });
@@ -228,6 +252,30 @@
     for (var i = 0; i < types.length; i++) if (MediaRecorder.isTypeSupported(types[i])) return types[i];
     return null;
   }
+  // The browser's WebM recorder leaves out the video's length, so players cannot show it or seek.
+  // Add a Duration element (in milliseconds) to the file's Info section. Any surprise leaves the file as it was.
+  function webmDuration(u, ms) {
+    function find(id, from, to) {
+      for (var i = from; i < to - id.length; i++) { var ok = true; for (var j = 0; j < id.length; j++) if (u[i + j] !== id[j]) { ok = false; break; } if (ok) return i; }
+      return -1;
+    }
+    function vint(p) { var len = 1, mask = 0x80; while (len <= 8 && !(u[p] & mask)) { len++; mask >>= 1; } var v = u[p] & (mask - 1); for (var i = 1; i < len; i++) v = v * 256 + u[p + i]; return { len: len, v: v, unknown: v === Math.pow(2, 7 * len) - 1 }; }
+    try {
+      var info = find([0x15, 0x49, 0xA9, 0x66], 0, Math.min(u.length, 4096)); if (info < 0) return u;
+      var sz = vint(info + 4); if (sz.unknown) return u;
+      var start = info + 4 + sz.len, end = start + sz.v;
+      if (find([0x44, 0x89], start, end) > -1) return u;
+      var add = new Uint8Array(11); add.set([0x44, 0x89, 0x88]); new DataView(add.buffer).setFloat64(3, ms);
+      var nv = sz.v + 11; if (nv >= Math.pow(2, 7 * sz.len) - 1) return u;
+      var out = new Uint8Array(u.length + 11);
+      out.set(u.subarray(0, end)); out.set(add, end); out.set(u.subarray(end), end + 11);
+      for (var i = sz.len - 1, x = nv; i >= 0; i--) { out[info + 4 + i] = x % 256; x = Math.floor(x / 256); }
+      out[info + 4] |= 0x80 >> (sz.len - 1);
+      var seg = find([0x18, 0x53, 0x80, 0x67], 0, info);
+      if (seg > -1) { var ss = vint(seg + 4); if (!ss.unknown) { var sv = ss.v + 11; for (var k = ss.len - 1; k >= 0; k--) { out[seg + 4 + k] = sv % 256; sv = Math.floor(sv / 256); } out[seg + 4] |= 0x80 >> (ss.len - 1); } }
+      return out;
+    } catch (e) { return u; }
+  }
   function recordVideo(L, done, fail) {
     var type = videoType(), m = L.map, dec = window.MyMapsDecor && window.MyMapsDecor.make(W, H);
     if (!type || !dec) { fail(); return; }
@@ -236,7 +284,13 @@
     var ctx = out.getContext("2d"), stream = out.captureStream(30), chunks = [];
     var rec = new MediaRecorder(stream, { mimeType: type, videoBitsPerSecond: 6e6 });
     rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
-    rec.onstop = function () { stream.getTracks().forEach(function (t) { t.stop(); }); done(new Blob(chunks, { type: type.split(";")[0] }), type.indexOf("mp4") > -1 ? "mp4" : "webm"); };
+    rec.onstop = function () {
+      stream.getTracks().forEach(function (t) { t.stop(); });
+      var blob = new Blob(chunks, { type: type.split(";")[0] });
+      if (type.indexOf("mp4") > -1) { done(blob, "mp4"); return; }
+      blob.arrayBuffer().then(function (b) { done(new Blob([webmDuration(new Uint8Array(b), length)], { type: blob.type }), "webm"); })
+        .catch(function () { done(blob, "webm"); });
+    };
     var HOLD = 1200, length = dec.duration + HOLD, start = null, last = 0;
     // The color band along the bottom slides sideways through the four status colors and loops seamlessly.
     var c = L.c, bandY = L.h - L.band, flow = ctx.createLinearGradient(0, 0, L.w, 0);
@@ -400,13 +454,23 @@
     ctx.fillStyle = band; ctx.fillRect(0, L.h - L.band, L.w, L.band);
     return canvas;
   }
+  // The SVG carries its own copy of the title font, so it looks the same when opened outside the site.
+  var svgFont = "";
+  Promise.all(["latin", "latin-ext"].map(function (n) {
+    return fetch("assets/fonts/instrument-serif-v5-" + n + ".woff2").then(function (r) { if (!r.ok) throw r; return r.arrayBuffer(); });
+  })).then(function (bufs) {
+    svgFont = "<style>" + bufs.map(function (b) {
+      var bin = "", u = new Uint8Array(b); for (var i = 0; i < u.length; i += 8192) bin += String.fromCharCode.apply(null, u.subarray(i, i + 8192));
+      return '@font-face{font-family:"Instrument Serif";src:url(data:font/woff2;base64,' + btoa(bin) + ') format("woff2")}';
+    }).join("") + "</style>";
+  }).catch(function () {});
   // The same layout as an SVG file, so it stays sharp at any size.
   function paintSvg(L) {
     var c = L.c, m = L.map, sp = d3.geoPath(projection), o = [];
     function a(t) { return esc(String(t)); }
     function fontAttrs(f) { var mm = /^(\d+) (\d+)px (.*)$/.exec(f); return 'font-weight="' + mm[1] + '" font-size="' + mm[2] + '" font-family="' + a(mm[3]) + '"'; }
     o.push('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + L.w + ' ' + L.h + '" width="' + L.w * 2 + '" height="' + L.h * 2 + '">');
-    o.push('<defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + c.bg + '"/><stop offset="1" stop-color="' + c.sea + '"/></linearGradient>' +
+    o.push('<defs>' + svgFont + '<linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + c.bg + '"/><stop offset="1" stop-color="' + c.sea + '"/></linearGradient>' +
       '<linearGradient id="band"><stop offset="0" stop-color="' + c.visited + '"/><stop offset=".333" stop-color="' + c.planning + '"/><stop offset=".667" stop-color="' + c.lived + '"/><stop offset="1" stop-color="' + c.living + '"/></linearGradient>' +
       '<clipPath id="mapclip"><rect x="' + m.x + '" y="' + m.y + '" width="' + m.w + '" height="' + m.h + '" rx="' + m.r + '"/></clipPath>' +
       '<filter id="shadow" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="' + m.drop + '" stdDeviation="' + m.shadow / 2 + '" flood-opacity=".18"/></filter></defs>');
@@ -482,9 +546,10 @@
   var input = document.getElementById("country-search"), list = document.getElementById("search-results"), active = -1, matches = [];
   function norm(s) { return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase(); }
   function showResults() {
-    var q = norm(input.value.trim());
+    // "St" and "St." also match "Saint", as in St Kitts or St. Lucia.
+    var q = norm(input.value.trim()).replace(/(^|\s)st\.?(\s|$)/g, "$1saint$2").trim();
     if (!q) { list.hidden = true; input.setAttribute("aria-expanded", "false"); return; }
-    matches = countries.filter(function (c) { var k = codes(c); return norm(c.properties.name).indexOf(q) !== -1 || (k && (norm(k.a2) === q || norm(k.a3) === q)); })
+    matches = countries.filter(function (c) { var k = codes(c); return norm(c.properties.name).indexOf(q) !== -1 || c.properties.a.some(function (n) { return norm(n).indexOf(q) !== -1; }) || (k && (norm(k.a2) === q || norm(k.a3) === q)); })
       .sort(function (a, b) { return rank(a) - rank(b); }).slice(0, 8);
     // Exact code matches first, then names that start with the text, then the rest.
     function rank(c) { var k = codes(c); if (k && (norm(k.a2) === q || norm(k.a3) === q)) return 0; return norm(c.properties.name).indexOf(q) === 0 ? 1 : 2; }
