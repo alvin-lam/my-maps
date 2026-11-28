@@ -11,7 +11,7 @@ Live site: https://mymaps.alltripsconsidered.com/
 ### Marking places
 
 - **Four statuses:** Visited, Planning, Lived and Living.
-- **Search:** Find any place by its English name, by its name in its official languages, or by its two- or three-letter country code. Deutschland, 日本 and España all work, as do former and common names such as Turkey, Swaziland or Ivory Coast, and "St" finds "Saint". Each result reads English name | official-language names | flag, for example "Switzerland | Schweiz · Suisse · Svizzera | 🇨🇭".
+- **Search:** Find any place by its English name, by its name in its official languages, or by its two- or three-letter country code. Deutschland, 日本 and España all work, as do former and common names such as Turkey, Swaziland or Ivory Coast, and "St" finds "Saint". Each result reads English name | official-language names | flag, for example "Switzerland | Schweiz · Suisse · Svizzera | 🇨🇭". The English name is not repeated, so France reads "France | 🇫🇷" and India "India | भारत | 🇮🇳".
 - **Zoom and pan:** Use the buttons, a mouse wheel or touch gestures. On phones, one finger scrolls the page and two fingers zoom the map; once the map is zoomed in, one finger moves it.
 - **Small places:** Islands and microstates too small to see get a dot that can be tapped and takes the status color.
 - **Counts and lists:** See totals for each status and a full list under "My countries".

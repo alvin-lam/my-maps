@@ -3,8 +3,8 @@
   var KEY = "world-map-statuses";
   var STATUSES = ["visited", "planning", "lived", "living"];
   var LABEL = { visited: "Visited", planning: "Planning", lived: "Lived", living: "Living" };
-  // Keys that were split into new places. A mark saved on the old key moves to each new key that has none.
-  var MOVED = { "x-Indian Ocean Ter.": ["162", "166"] };
+  // Keys that were split into new places or merged into another. A mark saved on the old key moves to each new key that has none.
+  var MOVED = { "x-Indian Ocean Ter.": ["162", "166"], "x-Ashmore and Cartier Is.": ["036"] };
   var data = load();
   var countries = [], byId = {}, selectedId = null;
   // A colored status dot. Built with DOM calls (no HTML strings), as the Content Security Policy requires.

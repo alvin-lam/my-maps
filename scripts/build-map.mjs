@@ -19,8 +19,19 @@ let features = splitTerritories(fc.features.filter((f) => f.properties.name !== 
 
 // 2. Give each place the same key the site has always saved, then its full name.
 for (const f of features) {
-  f.key = f.id && f.properties.name !== "Ashmore and Cartier Is." ? String(f.id) : "x-" + f.properties.name;
+  f.key = f.id ? String(f.id) : "x-" + f.properties.name;
   if (FULL[f.properties.name]) f.properties.name = FULL[f.properties.name];
+}
+// Shapes that share a key are one place, such as Ashmore and Cartier Islands, which is part of Australia.
+{
+  const byKey = new Map();
+  features = features.filter((f) => {
+    const first = byKey.get(f.key);
+    if (!first) { byKey.set(f.key, f); return true; }
+    const polys = (g) => (g.type === "Polygon" ? [g.coordinates] : g.coordinates);
+    first.geometry = { type: "MultiPolygon", coordinates: polys(first.geometry).concat(polys(f.geometry)) };
+    return false;
+  });
 }
 
 // 3. Cut each disputed area out of whichever places it overlaps, so nothing is drawn twice.
@@ -45,7 +56,8 @@ for (const f of features) {
 }
 
 // Names in each place's official languages, from Unicode CLDR: the languages CLDR marks official
-// (or de facto official where none is), most spoken first. A name can match the English one, as France does.
+// (or de facto official where none is), most spoken first. The English name is left out, since the result already shows it:
+// names that match it, as France's does, and the name in English where English is an official language.
 const territoryInfo = require("cldr-core/supplemental/territoryInfo.json").supplemental.territoryInfo;
 const cldrNames = {};
 function regionName(lang, region) {
@@ -66,6 +78,7 @@ function nativeNames(region, key) {
     .sort((a, b) => Number(langs[b]._populationPercent) - Number(langs[a]._populationPercent));
   const seen = new Set(), out = [];
   for (const l of list) {
+    if (l === "en" || l.startsWith("en_")) continue;
     const n = regionName(l, region);
     if (n && !seen.has(n.toLowerCase())) { seen.add(n.toLowerCase()); out.push(n); }
   }
@@ -82,7 +95,8 @@ for (const f of features) {
   } else if (f.properties.flag) p.f = f.properties.flag;
   if (f.properties.note || NOTES[f.key]) p.note = f.properties.note || NOTES[f.key];
   if (ALIAS[f.key]) p.a = ALIAS[f.key];
-  const l = NATIVE[f.key] || nativeNames(NATIVE_REGION[f.key] || p.c2, f.key);
+  const english = [p.n, regionName("en", NATIVE_REGION[f.key] || p.c2) || ""].map((s) => s.toLowerCase());
+  const l = (NATIVE[f.key] || nativeNames(NATIVE_REGION[f.key] || p.c2, f.key)).filter((n) => english.indexOf(n.toLowerCase()) === -1);
   if (l.length) p.l = l;
   if (f.properties.tiny) p.tiny = 1;
   places[f.key] = p;
